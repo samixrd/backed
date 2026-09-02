@@ -3,5 +3,6 @@ dist/
 *.log
 .env
 .env.local
+.backed-data/
 .DS_Store
 *.tsbuildinfo

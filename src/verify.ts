@@ -9,6 +9,7 @@
  * tamper-demo — we never hide it. All data is real market data; the strategy makes no alpha claim.
  */
 
+import "dotenv/config";
 import { runFundPipeline } from "./pipeline.js";
 import { pickStoreFromEnv } from "./store.js";
 import { auditAgentRecord, formatReport } from "./verifier.js";
@@ -37,7 +38,15 @@ async function main() {
   write("── [1] Genuine record (real data) ──");
   write(`    evidenceSetHash: ${res.evidenceSetHash}`);
   write(`    decisionHash:    ${res.decisionHash}`);
-  write(`    reasonHash:      ${res.decision?.reasonHash}  (IP preserved)\n`);
+  write(`    reasonHash:      ${res.decision?.reasonHash}  (IP preserved)`);
+  if (res.anchorTxHash) {
+    write(`    ONCHAIN ANCHOR:  ${res.anchorTxHash}  (BSC testnet)`);
+    write(`      explorer: https://testnet.bscscan.com/tx/${res.anchorTxHash}`);
+    write(`      blockTime: ${res.anchorBlockTime?.toString()}`);
+  } else {
+    write("    anchor: dry-run intent (ANCHOR_PRIVATE_KEY unset) — not a real tx");
+  }
+  write("");
 
   // 2. Verify the genuine record → likely PASS.
   const genuine = await auditAgentRecord(store, agentId, { checkOrdering: true });

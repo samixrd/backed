@@ -38,6 +38,9 @@ export interface PipelineResult {
   decision?: Decision;
   decisionHash?: string;
   link?: ChainEntry["link"];
+  anchorTxHash?: string;
+  anchorBlockTime?: bigint;
+  anchored?: boolean;
   verification?: { ok: boolean };
   stored?: boolean;
 }
@@ -87,15 +90,24 @@ export async function runFundPipeline(cfg: PipelineConfig): Promise<PipelineResu
   const prevH = index === 0 ? "" : existing[index - 1].link.h;
   const link = computeLink(index, dh, prevH);
 
-  // 6. Persist.
   const entry: ChainEntry = { decision, link };
+
+  // 6. Onchain anchor (timestamp proof). If ANCHOR_PRIVATE_KEY + ANCHOR_TO are set, this commits
+  //    a real tx to BSC testnet and records the blockTime. Otherwise it's a deterministic
+  //    dry-run intent (honestly labeled — never a fake tx hash).
+  const { anchorDecisionHash } = await import("./anchor.js");
+  const anchor = await anchorDecisionHash(dh);
+  entry.anchorBlockTime = anchor.blockTime;
+  const anchorTxHash = anchor.anchored ? anchor.txHash : undefined;
+
+  // 7. Persist.
   try {
     await store.saveEntry(entry);
   } catch (e: any) {
     return { ok: false, step: `persist: ${e.message}` };
   }
 
-  // 7. Verify we can reload + verify a clean record (round-trip integrity).
+  // 8. Verify we can reload + verify a clean record (round-trip integrity).
   const reloaded = await store.loadAgentRecord(cfg.agentId);
   const ver = verifyRecord(reloaded);
   if (!ver.ok) return { ok: false, step: "verify-after-persist failed" };
@@ -110,6 +122,9 @@ export async function runFundPipeline(cfg: PipelineConfig): Promise<PipelineResu
     decision,
     decisionHash: dh,
     link,
+    anchorTxHash,
+    anchorBlockTime: anchor.blockTime,
+    anchored: anchor.anchored,
     verification: { ok: ver.ok },
     stored: true,
   };

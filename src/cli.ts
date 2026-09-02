@@ -9,6 +9,7 @@
  * onchain anchor are separate (see DATA_SOURCES.md / PROVABLE_ALPHA_SPEC.md).
  */
 
+import "dotenv/config";
 import { runFundPipeline, type PipelineConfig } from "./pipeline.js";
 import { pickStoreFromEnv } from "./store.js";
 
