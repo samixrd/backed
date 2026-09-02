@@ -35,6 +35,8 @@ export async function GET() {
       side: res.decision?.side ?? null,
       state: {
         reasoningMode: res.reasoningMode,
+        reasoningProvider: res.reasoningProvider,
+        reasoningModel: res.reasoningModel,
         evidenceSetHash: res.evidenceSetHash,
         decisionHash: res.decisionHash,
         reasonHash: res.decision?.reasonHash ?? null,

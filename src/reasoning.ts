@@ -23,7 +23,7 @@ export interface Reasoning {
   rationale: string; // public label; hashed to reasonHash
   mode: "gpt" | "deterministic";
   model?: string;
-  provider?: "azure" | "openai";
+  provider?: "azure" | "openai" | "bai";
 }
 
 function median(nums: number[]): number {
@@ -99,12 +99,43 @@ export async function gptReasoning(sum: SnapshotSummary, apiKey: string, model =
   return { rationale: j.choices?.[0]?.message?.content?.trim() ?? "", mode: "gpt", model, provider: "openai" };
 }
 
-/** Pick reasoning strategy based on env: Azure first, then standard OpenAI, else deterministic. */
+/** B.AI (free) chat completions — qwen3.8-flash. Preferred free brain (deepseek free was limited). */
+export async function baiGptReasoning(sum: SnapshotSummary, apiKey: string, model = "qwen3.8-flash"): Promise<Reasoning> {
+  const res = await fetch("https://api.b.ai/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: "user", content: buildPrompt(sum) }],
+      temperature: 0.2,
+      max_tokens: 120,
+    }),
+  });
+  if (!res.ok) throw new Error(`B.AI ${model} error ${res.status}: ${await res.text()}`);
+  const j: any = await res.json();
+  return {
+    rationale: j.choices?.[0]?.message?.content?.trim() ?? "",
+    mode: "gpt",
+    model,
+    provider: "bai",
+  };
+}
+
+/** Pick reasoning strategy based on env: B.AI qwen free first, then Azure, then deterministic. */
 export async function produceReasoning(
   sum: SnapshotSummary,
   apiKey?: string,
   model?: string,
 ): Promise<Reasoning> {
+  // B.AI qwen3.8-flash is the free default brain (no cost, no quota like deepseek).
+  const baiKey = process.env.BAI_API_KEY;
+  if (baiKey) {
+    try {
+      return await baiGptReasoning(sum, baiKey, process.env.BAI_MODEL || "qwen3.8-flash");
+    } catch (e) {
+      // fall through to Azure if B.AI is down
+    }
+  }
   // Azure OpenAI is the configured brain.
   if (process.env.AZURE_OPENAI_API_KEY && process.env.AZURE_OPENAI_ENDPOINT) {
     try {

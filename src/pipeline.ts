@@ -36,6 +36,8 @@ export interface PipelineResult {
   evidenceSetHash?: string;
   reasoningLabel?: string;
   reasoningMode?: string;
+  reasoningProvider?: string;
+  reasoningModel?: string;
   decision?: Decision;
   decisionHash?: string;
   link?: ChainEntry["link"];
@@ -134,6 +136,8 @@ export async function runFundPipeline(cfg: PipelineConfig): Promise<PipelineResu
     evidenceSetHash,
     reasoningLabel: reasoning.rationale,
     reasoningMode: reasoning.mode,
+    reasoningProvider: reasoning.provider,
+    reasoningModel: reasoning.model,
     decision,
     decisionHash: dh,
     link,
