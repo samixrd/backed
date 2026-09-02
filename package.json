@@ -1,0 +1,21 @@
+{
+  "name": "backed",
+  "version": "0.1.0",
+  "description": "Provable Alpha — autonomous AI fund agent with a crypto-verified, tamper-evident performance record (Binance Agent OS, Track A)",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test test/",
+    "test:watch": "node --test --watch test/",
+    "fund:dryrun": "node dist/cli.js --dry-run",
+    "fund:live": "node dist/cli.js"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "typescript": "^7.0.2"
+  }
+}
