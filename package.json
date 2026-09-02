@@ -9,10 +9,12 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "node --test test/",
-    "test:watch": "node --test --watch test/",
-    "fund:dryrun": "node dist/cli.js --dry-run",
-    "fund:live": "node dist/cli.js",
+    "pretest": "tsc -p tsconfig.json",
+    "test": "node --test \"dist/test/**/*.js\"",
+    "test:watch": "node --test --watch --test-reporter spec \"dist/test/**/*.js\"",
+    "fund:dryrun": "node dist/src/cli.js --dry-run",
+    "fund:live": "node dist/src/cli.js --live",
+    "verify": "node dist/src/verify.js",
     "db:schema": "supabase db push"
   },
   "devDependencies": {

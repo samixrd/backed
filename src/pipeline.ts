@@ -79,9 +79,13 @@ export async function runFundPipeline(cfg: PipelineConfig): Promise<PipelineResu
     now,
   });
 
-  // 5. Hash + chain-link (genesis: link.index === 0, prevH "").
+  // 5. Hash + chain-link. If a record already exists, APPEND to it (real append-only chain);
+  // otherwise start at genesis (index 0, prevH "").
   const dh = decisionHash(decision);
-  const link = computeLink(0, dh, "");
+  const existing = await store.loadAgentRecord(cfg.agentId);
+  const index = existing.length;
+  const prevH = index === 0 ? "" : existing[index - 1].link.h;
+  const link = computeLink(index, dh, prevH);
 
   // 6. Persist.
   const entry: ChainEntry = { decision, link };
