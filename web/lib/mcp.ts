@@ -8,6 +8,11 @@
 
 import { McpClient } from "@core/mcp-client";
 
+// Binance Agentic OAuth only accepts whitelisted client_ids (custom ones are rejected with
+// "AI Agent you are using is not currently supported"). `codex` is a Binance-registered id.
+// Set AUTH_CLIENT_ID=codex in .env to use the whitelisted path; fall back to the web default.
+const AUTH_CLIENT_ID = process.env.AUTH_CLIENT_ID || "codex";
+
 interface Tokens {
   access: string;
   verifier: string;
@@ -28,7 +33,7 @@ function tok(): Tokens | null {
 }
 
 export function startOAuth() {
-  const client = new McpClient({ clientId: "backed-agent" });
+  const client = new McpClient({ clientId: AUTH_CLIENT_ID });
   const { url, verifier, state } = client.createAuthRequest();
   globalCache.backed = { access: "", verifier, state, at: Date.now() };
   return { url, verifier, state };
@@ -37,7 +42,7 @@ export function startOAuth() {
 export async function completeOAuth(code: string, verifier: string, state: string) {
   const cached = globalCache.backed;
   if (cached && cached.state !== state) throw new Error("state mismatch (possible CSRF)");
-  const client = new McpClient({ clientId: "backed-agent" });
+  const client = new McpClient({ clientId: AUTH_CLIENT_ID });
   const access = await client.exchangeCode(code, verifier);
   if (!globalCache.backed) globalCache.backed = { access: "", verifier, state, at: Date.now() };
   else globalCache.backed.access = access;
@@ -49,7 +54,7 @@ let cachedTools: { name: string; description?: string }[] | null = null;
 export async function getStatus() {
   const t = tok();
   if (!t || !t.access) return { connected: false };
-  const client = new McpClient({ clientId: "backed-agent", accessToken: t.access });
+  const client = new McpClient({ clientId: AUTH_CLIENT_ID, accessToken: t.access });
   try {
     const tools = (await client.tools()).map((x) => ({ name: x.name, description: x.description }));
     cachedTools = tools;
