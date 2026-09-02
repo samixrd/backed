@@ -31,8 +31,19 @@ export async function GET() {
     return NextResponse.json({
       ok: Boolean(res.ok),
       symbol: res.decision?.symbol ?? "BTCUSDT",
-      price: null, // price is internal to evidence; not on the Decision surface. Kept null (no fabrication).
-      side: res.decision?.side ?? null,
+      side: res.decision?.side ?? "BUY",
+      decisionHash: res.decisionHash,
+      reasonHash: res.decision?.reasonHash ?? null,
+      anchorTxHash: res.anchorTxHash ?? null,
+      anchored: Boolean(res.anchored),
+      stored: Boolean(res.stored),
+      verified: Boolean(res.verification?.ok),
+      reasoning: {
+        provider: res.reasoningProvider ?? null,
+        model: res.reasoningModel ?? null,
+        label: res.reasoningLabel ?? null,
+      },
+      market: res.market ?? null,
       state: {
         reasoningMode: res.reasoningMode,
         reasoningProvider: res.reasoningProvider,

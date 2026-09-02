@@ -38,6 +38,13 @@ export interface PipelineResult {
   reasoningMode?: string;
   reasoningProvider?: string;
   reasoningModel?: string;
+  market?: {
+    symbol: string;
+    medianPriceUsd: number;
+    maxDeviationPct: number;
+    fearGreed?: number;
+    quotes: { source: string; priceUsd: number }[];
+  };
   decision?: Decision;
   decisionHash?: string;
   link?: ChainEntry["link"];
@@ -138,6 +145,13 @@ export async function runFundPipeline(cfg: PipelineConfig): Promise<PipelineResu
     reasoningMode: reasoning.mode,
     reasoningProvider: reasoning.provider,
     reasoningModel: reasoning.model,
+    market: {
+      symbol: "BTCUSDT",
+      medianPriceUsd: summary.medianPriceUsd,
+      maxDeviationPct: summary.maxDeviationPct,
+      fearGreed: summary.fearGreed,
+      quotes: summary.priceCorelated,
+    },
     decision,
     decisionHash: dh,
     link,

@@ -52,6 +52,32 @@ export function SmartRecord() {
         {s.verified && <span className="rounded bg-success/10 px-2 py-0.5 font-mono text-[10px] text-success">VERIFIED</span>}
         {!s.verified && s.anchored && <span className="rounded bg-accent-faint px-2 py-0.5 font-mono text-[10px] text-accent">PENDING</span>}
       </div>
+
+      {/* Real market data (multi-source corroborated) */}
+      {data.market && (
+        <div className="mt-3 border-t border-border pt-3">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-faint">Market (corroborated)</p>
+          <p className="mt-1 font-mono text-sm text-foreground">
+            ${data.market.medianPriceUsd?.toLocaleString()}
+            <span className="text-[10px] text-faint"> median · dev {data.market.maxDeviationPct}% · F&G {data.market.fearGreed ?? "—"}</span>
+          </p>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {data.market.quotes?.map((q: any) => (
+              <span key={q.source} className="rounded border border-border bg-surface-raised px-2 py-0.5 font-mono text-[10px] text-muted" title={q.source}>
+                {q.source.replace("-", " ")} = ${q.priceUsd?.toLocaleString()}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Real reasoning rationale (public label only) */}
+      {data.reasoning?.label && (
+        <p className="mt-3 text-xs leading-5 text-muted">
+          <span className="text-faint">rationale: </span>{data.reasoning.label}
+        </p>
+      )}
+
       <dl className="mt-3 space-y-1.5 font-mono text-xs">
         <Row k="symbol" v={data.symbol} />
         <Row k="side" v={data.side} />

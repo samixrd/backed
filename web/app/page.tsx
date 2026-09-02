@@ -1,4 +1,4 @@
-import { agent, record, verifierReport, feed } from "@/lib/data";
+import { agent, record, verifierReport } from "@/lib/data";
 import { AgentProfile } from "@/components/agent-profile";
 import { ProvableRecord, VerificationPanel } from "@/components/provable-record";
 import { LiveFeed } from "@/components/live-feed";
@@ -24,7 +24,7 @@ export default function Home() {
           </div>
         </div>
         <div className="mt-4 rule" />
-        <LiveFeed feed={feed} />
+        <LiveFeed />
         <Footer />
       </main>
     </div>
