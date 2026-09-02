@@ -77,21 +77,24 @@ export class SupabaseStore implements Store {
   }
 
   async saveEntry(entry: ChainEntry): Promise<void> {
-    const { error } = await this.client.from(LEDGER_TABLE).insert({
-      agent_id: entry.decision.agentId,
-      index: entry.link.index,
-      decision_hash: entry.link.dataHash,
-      link_hash: entry.link.h,
-      prev_link_hash: entry.link.prevH,
-      anchor_block_time: entry.anchorBlockTime?.toString() ?? null,
-      fill_price: entry.fill?.fillPrice.toString() ?? null,
-      fill_qty: entry.fill?.fillQty.toString() ?? null,
-      fill_time: entry.fill?.fillTime.toString() ?? null,
-      order_id: entry.fill?.orderId ?? null,
-      canonical_decision: JSON.stringify(entry.decision, (_k, v) =>
-        typeof v === "bigint" ? v.toString() : v,
-      ),
-    });
+    const { error } = await this.client.from(LEDGER_TABLE).upsert(
+      {
+        agent_id: entry.decision.agentId,
+        index: entry.link.index,
+        decision_hash: entry.link.dataHash,
+        link_hash: entry.link.h,
+        prev_link_hash: entry.link.prevH,
+        anchor_block_time: entry.anchorBlockTime?.toString() ?? null,
+        fill_price: entry.fill?.fillPrice.toString() ?? null,
+        fill_qty: entry.fill?.fillQty.toString() ?? null,
+        fill_time: entry.fill?.fillTime.toString() ?? null,
+        order_id: entry.fill?.orderId ?? null,
+        canonical_decision: JSON.stringify(entry.decision, (_k, v) =>
+          typeof v === "bigint" ? v.toString() : v,
+        ),
+      },
+      { onConflict: "agent_id,index" },
+    );
     if (error) throw new Error(`saveEntry: ${error.message}`);
   }
 

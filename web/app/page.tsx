@@ -5,6 +5,7 @@ import { LiveFeed } from "@/components/live-feed";
 import { Hero } from "@/components/hero";
 import { OAuthConnect } from "@/components/oauth-connect";
 import { OAuthCallbackHandler } from "@/components/oauth-callback-handler";
+import { SmartRecord } from "@/components/smart-record";
 
 export default function Home() {
   return (
@@ -17,6 +18,7 @@ export default function Home() {
         <div className="mt-10 grid grid-cols-1 gap-4 lg:grid-cols-3">
           <AgentProfile agent={agent} />
           <div className="lg:col-span-2 grid grid-cols-1 gap-4">
+            <SmartRecord />
             <ProvableRecord record={record} />
             <VerificationPanel report={verifierReport} agentId={agent.agentId} />
           </div>

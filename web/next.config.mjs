@@ -8,6 +8,8 @@ const nextConfig = {
   // Let the web app import the shared core (canonical, provable, mcp-client) from ../src.
   webpack: (config) => {
     config.resolve.alias["@core"] = path.resolve(__dirname, "../src");
+    // Core uses NodeNext-style `.js` import specifiers that must resolve to `.ts` files.
+    config.resolve.extensionAlias = { ...config.resolve.extensionAlias, ".js": [".ts", ".tsx", ".js"] };
     return config;
   },
 };
