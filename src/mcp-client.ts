@@ -70,6 +70,25 @@ export class McpClient {
     return `${AUTHORIZE}?${params.toString()}`;
   }
 
+  /**
+   * Generate a full auth request and RETURN the verifier + state so the caller can persist them
+   * (PKCE requires the verifier at token exchange, after the browser redirect round-trip).
+   */
+  createAuthRequest(): { url: string; verifier: string; state: string } {
+    const { verifier, challenge } = McpClient.pkce();
+    const state = randomUUID();
+    const params = new URLSearchParams({
+      response_type: "code",
+      client_id: this.clientId,
+      redirect_uri: "http://localhost:3000/oauth/callback",
+      scope: "marketData account trade",
+      code_challenge: challenge,
+      code_challenge_method: "S256",
+      state,
+    });
+    return { url: `${AUTHORIZE}?${params.toString()}`, verifier, state };
+  }
+
   /** Exchange the OAuth code (from redirect) for an access token. */
   async exchangeCode(code: string, verifier: string): Promise<string> {
     const body = new URLSearchParams({

@@ -3,13 +3,17 @@ import { AgentProfile } from "@/components/agent-profile";
 import { ProvableRecord, VerificationPanel } from "@/components/provable-record";
 import { LiveFeed } from "@/components/live-feed";
 import { Hero } from "@/components/hero";
+import { OAuthConnect } from "@/components/oauth-connect";
+import { OAuthCallbackHandler } from "@/components/oauth-callback-handler";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
+      <OAuthCallbackHandler />
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-10">
         <Hero />
+        <div className="mt-6"><OAuthConnect /></div>
         <div className="mt-10 grid grid-cols-1 gap-4 lg:grid-cols-3">
           <AgentProfile agent={agent} />
           <div className="lg:col-span-2 grid grid-cols-1 gap-4">
