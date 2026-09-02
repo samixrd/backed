@@ -6,3 +6,4 @@ dist/
 .backed-data/
 .DS_Store
 *.tsbuildinfo
+.next/
