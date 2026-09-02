@@ -58,10 +58,11 @@ const LEDGER_TABLE = "provable_ledger";
 const FACTS_TABLE = "provable_agent_facts";
 
 export class SupabaseStore implements Store {
-  private client: SupabaseClient;
+  private client: SupabaseClient<any, "backed">;
 
   constructor(cfg: SupabaseConfig) {
-    this.client = createClient(cfg.url, cfg.anonKey);
+    // Point queries at the `backed` schema so we never touch Sidekick's `public.*` tables.
+    this.client = createClient(cfg.url, cfg.anonKey, { db: { schema: "backed" } });
   }
 
   async saveEvidence(evidence: Evidence, fingerprint: string): Promise<void> {

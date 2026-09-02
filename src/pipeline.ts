@@ -26,6 +26,7 @@ export interface PipelineConfig {
   gptModel?: string;
   now?: bigint; // injectable clock for tests
   store?: Store; // injectable; defaults from env
+  liveTrade?: boolean; // if true and binance testnet keys set, broadcast a real order
 }
 
 export interface PipelineResult {
@@ -41,6 +42,7 @@ export interface PipelineResult {
   anchorTxHash?: string;
   anchorBlockTime?: bigint;
   anchored?: boolean;
+  order?: import("./trader.js").OrderResult;
   verification?: { ok: boolean };
   stored?: boolean;
 }
@@ -100,6 +102,19 @@ export async function runFundPipeline(cfg: PipelineConfig): Promise<PipelineResu
   entry.anchorBlockTime = anchor.blockTime;
   const anchorTxHash = anchor.anchored ? anchor.txHash : undefined;
 
+  // 6b. Optional real execution (Binance testnet). Only if keys + live flag present;
+  //     otherwise a signed dry-run payload (never fabricates an order id).
+  let order;
+  const binanceKey = process.env.BINANCE_TESTNET_API_KEY;
+  const binanceSecret = process.env.BINANCE_TESTNET_API_SECRET;
+  if (binanceKey && binanceSecret) {
+    const { placeMarketOrder } = await import("./trader.js");
+    order = await placeMarketOrder(
+      { mode: "testnet", apiKey: binanceKey, apiSecret: binanceSecret, live: cfg.liveTrade === true },
+      { symbol: "BTCUSDT", side: cfg.side, quantity: (Number(cfg.qty) / 1e8).toString(), decisionHash: dh },
+    );
+  }
+
   // 7. Persist.
   try {
     await store.saveEntry(entry);
@@ -125,6 +140,7 @@ export async function runFundPipeline(cfg: PipelineConfig): Promise<PipelineResu
     anchorTxHash,
     anchorBlockTime: anchor.blockTime,
     anchored: anchor.anchored,
+    order,
     verification: { ok: ver.ok },
     stored: true,
   };
