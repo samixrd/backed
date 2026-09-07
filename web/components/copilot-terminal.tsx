@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useAgentSession } from "@/components/connect-modal";
@@ -26,6 +26,8 @@ interface ExecutedTrade {
   executedQty: number;
   notionalUsd: number;
   status: string;
+  mode?: string;
+  statusDetail?: string;
   strategyReasoning: string;
   decisionHash: string;
   bscTxHash: string;
@@ -462,18 +464,18 @@ export function CopilotTerminal() {
       {/* ── AUTONOMOUS TRADE OPEN RECEIPT BANNER ── */}
       {executedTrade && !closedTrade && (
         <div className="rounded-lg border border-success/40 bg-success/5 p-4 animate-fade-up space-y-3 font-mono">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-success/20 pb-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-2.5">
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
-              <span className="text-xs font-bold text-success uppercase tracking-wider">
-                Autonomous Trade Executed on Binance Agent OS
+              <span className={`h-2 w-2 rounded-full ${session.connected ? "bg-success" : "bg-accent"} animate-pulse`} />
+              <span className={`text-xs font-bold ${session.connected ? "text-success" : "text-accent"} uppercase tracking-wider`}>
+                {session.connected ? "Live Trade Executed · Binance Agent OS" : "Intent Committed · Sandbox / Provable Anchor"}
               </span>
-              <span className="rounded bg-success/20 px-1.5 py-0.2 text-[9px] font-bold text-success">
-                {executedTrade.status}
+              <span className={`rounded ${session.connected ? "bg-success/20 text-success" : "bg-accent/20 text-accent"} px-1.5 py-0.2 text-[9px] font-bold`}>
+                {session.connected ? "LIVE_FILLED" : (executedTrade.status || "INTENT_COMMITTED")}
               </span>
             </div>
             <span className="text-[10px] text-muted">
-              Order #{executedTrade.orderId} · {new Date(executedTrade.executedAt).toLocaleTimeString()}
+              {session.connected ? `Live Order #${executedTrade.orderId}` : `Sandbox Ref #${executedTrade.orderId.slice(-6)}`} · {new Date(executedTrade.executedAt).toLocaleTimeString()}
             </span>
           </div>
 
@@ -517,7 +519,25 @@ export function CopilotTerminal() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-success/15 text-[9px] text-faint">
+          {executedTrade.statusDetail && (
+            <div className="rounded bg-surface-raised/80 px-2.5 py-1.5 border border-border/60 text-[10px] text-muted flex items-center justify-between">
+              <span>ℹ️ {executedTrade.statusDetail}</span>
+              {!session.connected && (
+                <button
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      window.dispatchEvent(new CustomEvent("backed:open-connect"));
+                    }
+                  }}
+                  className="text-accent underline hover:text-accent-strong text-[9px] font-semibold ml-2 shrink-0"
+                >
+                  Connect API Key ↗
+                </button>
+              )}
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-border/40 text-[9px] text-faint">
             <span>
               Decision Hash: <code className="text-muted">{executedTrade.decisionHash.slice(0, 18)}...</code>
             </span>
