@@ -1,54 +1,61 @@
 # BACKED — 90-Second Hackathon Demo Script
 
-> Designed for the **Binance Agent OS Hackathon**. Direct, impactful, showing the live terminal, institutional charts, Binance Agent OS integration, and onchain verification in 90 seconds.
+> **Target:** Binance Agent OS Hackathon Judges.
+> **Format:** 90 seconds, high tempo, zero fluff, showing live production UI, intent trading, Whale Trap Shield, onchain BSC anchor, and external MCP integration.
+> **Live URL:** https://backed-zeta.vercel.app
 
 ---
 
 ## ACT 1 — The Hook & Problem (0:00–0:15)
-**"Every trading AI claims insane accuracy, but retail traders are drowned in complex metrics, and there is zero proof of a real track record without backdating or leaking strategy IP. We solve both."**
+**"Every trading AI claims insane accuracy. But retail traders are drowned in complex metrics, and there is zero proof of a claimed track record without backdating or leaking proprietary strategy IP. We solve both."**
 
-*Camera:* The BACKED Terminal UI.
-- Highlight the **Binance Agent OS Native** hero badge.
-- Highlight the live ticker: **BTCUSDT Live Price, OI, and Top Trader Long/Short Bias**.
-
----
-
-## ACT 2 — Live Market Intel & AI Copilot (0:15–0:40)
-**"Running natively inside Binance Agent OS, BACKED ingests real-time Binance Futures Open Interest, Top Trader Long/Short sentiment, and aggressive Taker volume."**
-
-*Camera:* Point to the three institutional SVG charts:
-1. **Top Trader Sentiment Donut Chart** (e.g. 55.6% Long).
-2. **Taker Flow Pressure Bar Chart** (Buy vs Sell imbalance).
-3. **Funding & Leverage Overheat Gauge**.
-
-**"Users don't need to stare at complex charts. They can simply ask the Binance Agent OS Copilot:"**
-*Action:* Click query chip or type *"What are top traders doing on BTC right now?"*
-*Copilot outputs:* Concise, institutional briefing based on live Binance derivatives.
+*Camera:* The live BACKED Dashboard at `https://backed-zeta.vercel.app`.
+- Point to the **Binance Agent OS Native** pulsing status badge.
+- Show the live **718 Perpetual Contracts Screener** sorted by Top Trader Long/Short bias.
 
 ---
 
-## ACT 3 — Provable Alpha Onchain Commit (0:40–1:05)
-**"When the agent makes a trade decision, it preserves proprietary IP: reasoning is hashed into `reasonHash` and instantly discarded. Then the decision hash is anchored directly onchain to the BNB Smart Chain (BSC Testnet)."**
+## ACT 2 — 718-Coin Market Intel & Intent Copilot (0:15–0:35)
+**"Running natively on Binance Agent OS, BACKED continuously ingests live Binance Futures Open Interest, Top Trader Long/Short account ratios, and aggressive Taker volume across 718 contracts."**
 
-*Camera:* Run terminal:
+*Action:* In the Terminal, type:
+> `"open 5 usdt trade what most smart money doing on SOL"`
+
+**"Instead of clicking through complex order forms, the user simply states their intent."**
+- Copilot synthesizes: *"Smart money is 70.4% Long on SOL with mild bullish regime..."*
+- Intent Engine automatically executes a $5 market Long on Binance Futures.
+- **Green Execution Receipt appears:** Order ID `8053256610`, Filled at $104.00, with live BSCScan testnet anchor link!
+
+---
+
+## ACT 3 — Whale Trap Shield (Smart Exit) (0:35–0:55)
+**"Opening a trade is easy; knowing when smart money is dumping is what protects capital. Watch our Whale Trap Shield."**
+
+*Action:* Click **"⚡ Trigger Smart Money Front-Run Exit"** or type:
+> `"exit trade when whales start distributing"`
+
+- **Whale Trap Radar** flashes: Detects distribution exhaust cluster.
+- Agent autonomously closes the position at live market price.
+- **Capital Protected Banner appears:** Realized PnL **+4.2%**, with an immutable cryptographic settlement hash anchored directly to BSC Testnet!
+
+---
+
+## ACT 4 — External Agent MCP Integration (0:55–1:15)
+**"BACKED is not just a dashboard — it is a universal infrastructure layer. Any developer using Claude Code or Cursor can connect to BACKED with a single command:"**
+
+*Camera:* Open terminal and run:
 ```bash
-node dist/src/pipeline.js
+claude mcp add backed --transport http https://backed-zeta.vercel.app/api/mcp
 ```
-*Output shown:*
-- `Decision Hash:` e.g. `7e4fcedce...`
-- `BSC Testnet Tx:` e.g. `0xc72698be7d6e261e384e74f69cc1dbdd5fe939c7884dd36ae52d9c6a60b670da`
-- **"The timestamp is locked onchain before execution. It can never be backdated or modified."**
+- Show Claude Code calling `backed_get_smart_money_intel` and executing trades through BACKED's MCP server in real-time.
 
 ---
 
-## ACT 4 — Independent Verifier Catches Tampering (1:05–1:25)
-**"Any AI can claim a track record. But BACKED features an independent Verifier Agent that re-audits every hash, chain link, and timestamp."**
+## ACT 5 — Provable Alpha & Cryptographic Audit (1:15–1:30)
+**"Every decision hash is anchored onchain before execution — impossible to backdate, impossible to tamper with, while strategy IP stays 100% private."**
 
-*Camera:* Run Verifier:
-- Genuine record: **`AUDIT VERDICT: PASS`**
-- Show a tampered record: **`AUDIT VERDICT: FAIL` (Caught instantly!)**
+*Action:* Show the embedded Verifier audit result:
+- **`AUDIT VERDICT: PASS ✓`**
+- Recomputed hashes match block timestamps on the BNB Smart Chain.
 
----
-
-## ACT 5 — The Closer (1:25–1:35)
-**"Real Binance market intel, everyday user simplicity, and cryptographically provable alpha on the BNB Smart Chain. That is BACKED on Binance Agent OS."**
+**"Live institutional market intel, everyday natural-language intent trading, and cryptographically provable alpha on BNB Smart Chain. That is BACKED on Binance Agent OS."**

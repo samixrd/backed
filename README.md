@@ -1,7 +1,16 @@
 # BACKED — Autonomous Market Intel & Trade Agent
 
-> **Institutional-grade market intelligence and trading execution, powered natively by Binance Agent OS.**
-> Built for the **Binance Agent OS Mini Hackathon · Track A & B** (AI Agents + Data & Analysis + Trading Workflows).
+> **Institutional-grade market intelligence, intent-driven autonomous execution, and provable alpha on BNB Smart Chain — powered natively by Binance Agent OS.**
+> Built for the **Binance Agent OS Hackathon · Track A & B** (AI Agents + Data & Analysis + Trading Workflows).
+
+---
+
+## 🌐 Live Production Deployment
+
+- 🖥️ **Web Dashboard (Live):** [https://backed-zeta.vercel.app](https://backed-zeta.vercel.app)
+- 🔌 **Official MCP Server (Claude Code / Cursor):** `https://backed-zeta.vercel.app/api/mcp`
+- 📜 **OpenAPI 3.1 Spec (OpenAI Codex / Custom GPTs):** `https://backed-zeta.vercel.app/api/openapi.json`
+- 🐙 **GitHub Repository:** [https://github.com/samixrd/backed](https://github.com/samixrd/backed)
 
 ---
 
@@ -9,11 +18,13 @@
 
 Every AI claims high accuracy, but everyday traders are overwhelmed by complex derivatives metrics, and nobody can verify if an agent's claimed track record is real or backdated.
 
-**BACKED bridges this gap**:
-1. **Real Market Intel:** Ingests live Binance Futures Open Interest (OI), Top Trader Long/Short Sentiment, Taker Buy/Sell aggression pressure, and 8h funding rates directly from Binance.
-2. **AI Copilot & Synthesis:** Powered by Azure OpenAI GPT-4o-mini & Binance Agent OS, translating raw multi-metric data into crystal-clear market regimes, conviction scores, and actionable signals.
-3. **Provable Alpha (Onchain Anchor):** Before execution, every decision is cryptographically hashed (`SHA256`) and anchored onto the **BNB Smart Chain (BSC Testnet)** as a permanent timestamp proof. No backdating, no tampering, zero IP leaks.
-4. **Independent Verifier Audit:** An embedded Verifier agent mathematically audits chain continuity, evidence hashes, and block times (`PASS` / `FAIL`).
+**BACKED bridges this gap with 5 core innovations**:
+
+1. **718-Contract Live Screener:** Ingests live Binance Futures Open Interest (OI), Top Trader Long/Short account ratios, and Taker Buy/Sell aggression pressure across all 718 USDT perpetual contracts.
+2. **Universal Intent Trading Engine:** Formulate natural-language trading goals (*"open 5 usdt trade what most smart money doing on SOL"*). The agent automatically classifies intent (`OPEN_TRADE`, `CLOSE_TRADE`, `INQUIRY`), queries live Binance derivatives, determines direction, fills the order, and outputs a cryptographic receipt.
+3. **Whale Trap Shield (Smart Exit):** Front-runs retail panic by monitoring microstructure exhaustion at key resistance levels. Automatically closes active positions at live market price, secures positive realized PnL, and preserves capital.
+4. **Provable Alpha (BSC Testnet Anchor):** Every trade decision and settlement is hashed (`SHA256`) and anchored onto the **BNB Smart Chain (BSC Testnet)** before execution. Immutable block timestamps provide tamper-evident mathematical proof against backdating, while preserving strategy IP.
+5. **Universal Agent OS Native (MCP Provider):** Any external coding or reasoning agent (Claude Code, Cursor IDE, OpenAI Codex, Groq/Hermes) can connect to BACKED via the **Model Context Protocol (MCP)** with a single command.
 
 ---
 
@@ -23,72 +34,84 @@ Every AI claims high accuracy, but everyday traders are overwhelmed by complex d
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        BINANCE AGENT OS RUNTIME                        │
 │                                                                        │
-│   [ Live Market Intel ]            [ Azure GPT-4o-mini Brain ]         │
-│   Binance Futures OI               Synthesizes Multi-Metric Flow       │
+│   [ Live Market Screener ]         [ Azure GPT-4o-mini Brain ]         │
+│   718 Binance Perpetual Contracts  Synthesizes Multi-Metric Flow       │
 │   Top Trader Long/Short Bias  ──>  Detects Market Regimes (Squeeze/    │
 │   Taker Flow Aggression            Accumulation/Distribution)          │
-│   8h Funding & Depth               Calculates Conviction (60-95%)      │
+│   Open Interest in USD             Calculates Conviction (60-95%)      │
+│                                                                        │
+│   [ Intent Execution Engine ]      [ Whale Trap Shield ]               │
+│   Natural Language -> Live Trade   Autonomous Front-run Exit           │
+│   Automatic sizing & filling       Exhaustion Radar & Microstructure   │
 │                                                                        │
 │   [ Provable Alpha Engine ]        [ Onchain Anchor (BSC Testnet) ]    │
 │   decisionHash = SHA256(decision)  Anchored via real transaction:      │
-│   reasonHash   = SHA256(reasoning) Tx: 0xc72698be...60b670da           │
-│   (Strategy IP is never stored)    Block timestamp = Anti-Backdating   │
+│   reasonHash   = SHA256(reasoning) Tx: 0x22ecef7c...58c358e            │
+│   (Zero IP Leakage)                Block timestamp = Anti-Backdating   │
 │                                                                        │
-│   [ Independent Verifier Agent ]   [ Institutional Dark Terminal ]     │
-│   Recomputes hashes & verifies     Donut & Bar Charts (Donut, Taker,   │
-│   chain continuity → PASS / FAIL   Leverage Gauge, AI Copilot Input)   │
+│   [ Universal MCP Server ]         [ Institutional Dark Terminal ]     │
+│   Claude Code / Cursor / Codex     Brass Accent (#c9a227) UI           │
+│   Protocol: JSON-RPC 2.0 (v2)      Scatter Plot, Screener, Copilot     │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 3. Tech Stack & Integrations
+## 3. Instant Connect with External Agents (MCP)
 
-- **Agent Runtime:** Binance Agent OS & Codex CLI
-- **Market Data Protocol:** Official Binance Agentic MCP (`https://agent.binance.com/mcp/agentic`) + Binance Futures Public API
-- **Reasoning Engine:** Azure OpenAI (`gpt-4o-mini-2024-07-18`) with structured JSON synthesis (Verified Live)
-- **Onchain Anchoring:** BNB Smart Chain (BSC Testnet) via JSON-RPC
-- **Database & Storage:** Supabase (`backed` schema) + LocalStore resilience
-- **Frontend Dashboard:** Next.js 14, Tailwind CSS, Editorial Dark Theme (`#0b0c0e`, `#c9a227` brass accent), SVG Institutional Charts
-
----
-
-## 4. Live Verification Output
-
-Running the full autonomous pipeline (`node dist/src/pipeline.js`):
-
+### Claude Code (Terminal CLI)
+Connect BACKED to your Claude Code terminal in 1 second:
 ```bash
->>> 1. INGESTION & ANCHORING VIA PIPELINE...
-STATUS: SUCCESS
-Symbol: BTCUSDT
-Corroborated Price: $79,071.00 (Binance Spot + CoinGecko)
-Open Interest: $8.53B USD (107,954 BTC)
-Top Trader Ratio: 55.6% Long vs 44.4% Short (1.25x Long Bias)
-Taker Execution Pressure: 0.68x Buy/Sell Flow
-Funding Rate: 0.0031%
-Reasoning: "With a high sentiment score of 71, a majority long positioning at 55.6%, and a funding rate of 0.0031%, the market shows strong bullish momentum and potential for further upside."
-Decision Hash: 7e4fcedce3936cd11b571a124d077cca1bfcde3904e9b620ed9a9f696c700c40
-Anchor Tx: 0xc72698be7d6e261e384e74f69cc1dbdd5fe939c7884dd36ae52d9c6a60b670da (BSC Testnet)
-
->>> 2. RUNNING INDEPENDENT VERIFIER AUDIT...
-AUDIT VERDICT: PASS
-REASON: Record integrity verified — all checks passed
-CHECKS: decisionHash:PASS | link:PASS | prevChain:PASS | evidence_bound:PASS | agent_bound:PASS
+claude mcp add backed --transport http https://backed-zeta.vercel.app/api/mcp
 ```
 
+### Cursor IDE & Claude Desktop
+Add to your `claude_desktop_config.json` or `~/.cursor/mcp.json`:
+```json
+{
+  "mcpServers": {
+    "backed": {
+      "url": "https://backed-zeta.vercel.app/api/mcp"
+    }
+  }
+}
+```
+
+### Available MCP Tools
+
+| Tool Name | What It Does |
+|---|---|
+| `backed_get_smart_money_intel` | Ingest real-time smart money positioning across 718 Binance Futures contracts (Top Trader Ratio, Taker Flow, OI, Institutional Regime). |
+| `backed_execute_intent_trade` | Autonomously execute a market order on Binance Futures and anchor cryptographic settlement proof to BSC Testnet. |
+| `backed_smart_exit_whale_shield` | Autonomously front-run retail panic and exit active positions when whales exhaust liquidity at resistance. |
+
 ---
 
-## 5. Quickstart & Commands
+## 4. Live Onchain Proofs (BSC Testnet)
+
+Every trade intent and settlement is verified onchain. Inspect recent live transactions:
+
+- **SOL Long Intent Anchor:** [`0x22ecef7c7b9f3bb0372b8103c921092b78c2044378932611ab8c4d3aa58c358e`](https://testnet.bscscan.com/tx/0x22ecef7c7b9f3bb0372b8103c921092b78c2044378932611ab8c4d3aa58c358e)
+- **Whale Shield Exit Anchor:** [`0xec20ddbdf187517c8d4f94537506b643321cee9a86c06e7c1da1444556e65e13`](https://testnet.bscscan.com/tx/0xec20ddbdf187517c8d4f94537506b643321cee9a86c06e7c1da1444556e65e13)
+- **Audit Verification Verdict:** `PASS ✓` — chain continuity verified without backdating.
+
+---
+
+## 5. Quickstart (Local Development)
 
 ```bash
-# 1. Install dependencies & build core
+# 1. Clone & Install
+git clone https://github.com/samixrd/backed.git
+cd backed
 npm install
-npx tsc -p tsconfig.json
 
-# 2. Run all unit tests (25/25 passing)
+# 2. Run unit tests (25/25 passing)
 npm test
 
-# 3. Launch Web Terminal
+# 3. Test autonomous fund pipeline dry-run
+npm run fund:dryrun
+
+# 4. Launch Next.js Web Terminal
 cd web
 npm install
 npm run dev
@@ -100,29 +123,39 @@ npm run dev
 ## 6. Repository Layout
 
 ```
-D:\BACKED\
+BACKED/
 ├── src/
 │   ├── market-intel.ts      # Live Binance Futures derivatives, OI, & Taker flow
 │   ├── reasoning.ts         # Azure GPT-4o-mini structured intelligence engine
 │   ├── pipeline.ts          # Autonomous fund loop (ingest -> reason -> anchor -> persist)
 │   ├── anchor.ts            # BSC Testnet onchain commit proof
 │   ├── verifier.ts          # Independent cryptographic audit agent
-│   ├── datasource.ts        # Multi-source price corroboration (Binance + CoinGecko)
+│   ├── datasource.ts        # Multi-source price corroboration (Binance + Coinbase)
 │   ├── canonical.ts         # Deterministic serialization (Trust Root)
 │   ├── provable.ts          # SHA-256 hash-chaining and proof math
 │   ├── mcp-client.ts        # Binance Agentic MCP client (OAuth + JSON-RPC)
 │   └── store.ts             # Supabase (`backed` schema) + LocalStore
-├── web/                     # Next.js Institutional Dark Terminal
+├── web/                     # Next.js Institutional Dark Terminal (Deployed on Vercel)
 │   ├── app/
 │   │   ├── page.tsx         # Main Dashboard Layout
 │   │   └── api/
-│   │       ├── intel/       # Live derivatives API
-│   │       ├── copilot/     # Natural Language AI Copilot API
-│   │       └── run/         # End-to-end commit runner
+│   │       ├── copilot/     # Universal Intent Trading API (Open/Close/Inquiry)
+│   │       ├── mcp/         # Official MCP Server (JSON-RPC 2.0)
+│   │       ├── openapi.json/# OpenAPI 3.1 Spec for Codex / GPTs
+│   │       ├── intel/       # Single coin deep intelligence API
+│   │       ├── screener/    # 718 perpetual contracts live screener
+│   │       ├── trade/       # Execute & Smart Exit routes
+│   │       └── run/         # End-to-end 24/7 pipeline cron runner
 │   └── components/
 │       ├── hero.tsx                 # Binance Agent OS Spotlight Hero
-│       ├── market-intel-section.tsx # Donut, Bar & Gauge SVG Charts
-│       └── copilot-terminal.tsx     # Natural Language Agent OS Prompt
+│       ├── token-screener.tsx       # 718-contract search & filter table
+│       ├── smart-money.tsx          # 50-coin sentiment scatter plot
+│       ├── copilot-terminal.tsx     # Intent Copilot & Whale Trap Shield Radar
+│       ├── connect-modal.tsx        # Binance Agent OS Session Manager
+│       └── mcp-integrate-modal.tsx  # Claude/Cursor/Codex 1-click integration guide
 ├── test/                    # 25 automated unit tests
-└── REBUILD_PLAN.md          # Implementation verification record
+├── AGENTS.md                # Binance Agent OS runtime instructions
+├── DATA_SOURCES.md          # Real-time market endpoints specification
+├── DEMO_SCRIPT.md           # 90-second hackathon presentation script
+└── PROVABLE_ALPHA_SPEC.md   # Cryptographic architecture specification
 ```
