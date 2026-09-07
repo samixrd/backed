@@ -64,12 +64,23 @@ export async function binanceBtcPrice(): Promise<PriceQuote> {
   };
 }
 
-/** Fetch BTC price from CoinGecko (corroboration, no key). */
+/** Fetch BTC price from Coinbase / Binance Futures (corroboration, free & resilient). */
 export async function coingeckoBtcPrice(): Promise<PriceQuote> {
-  const j: any = await httpsGetJson("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd");
+  try {
+    const j: any = await httpsGetJson("https://api.coinbase.com/v2/prices/BTC-USD/spot");
+    if (j?.data?.amount) {
+      return {
+        source: "coinbase-spot-price",
+        priceUsd: parseFloat(j.data.amount),
+        observedAt: BigInt(Date.now()),
+      };
+    }
+  } catch {}
+
+  const fb: any = await httpsGetJson("https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT");
   return {
-    source: "coingecko-simple-price",
-    priceUsd: parseFloat(j.bitcoin.usd),
+    source: "binance-futures-mark",
+    priceUsd: parseFloat(fb.price),
     observedAt: BigInt(Date.now()),
   };
 }
