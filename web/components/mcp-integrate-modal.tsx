@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 
@@ -22,13 +22,14 @@ export function McpIntegrateModal({
     }
   }
 
-  const claudeCodeCmd = "claude mcp add backed --transport http http://localhost:3000/api/mcp";
+  const PROD_URL = "https://backed-zeta.vercel.app";
+  const claudeCodeCmd = `claude mcp add backed --transport http ${PROD_URL}/api/mcp`;
 
   const cursorJson = JSON.stringify(
     {
       mcpServers: {
         backed: {
-          url: "http://localhost:3000/api/mcp",
+          url: `${PROD_URL}/api/mcp`,
         },
       },
     },
@@ -36,7 +37,7 @@ export function McpIntegrateModal({
     2
   );
 
-  const openApiUrl = "http://localhost:3000/api/openapi.json";
+  const openApiUrl = `${PROD_URL}/api/openapi.json`;
 
   const groqPython = `from groq import Groq
 import requests
@@ -44,7 +45,7 @@ import requests
 client = Groq()
 
 # 1. Fetch live BACKED Smart Money Intel
-intel = requests.get("http://localhost:3000/api/intel?symbol=SOLUSDT").json()
+intel = requests.get("${PROD_URL}/api/intel?symbol=SOLUSDT").json()
 
 # 2. Let Hermes/Groq decide trade execution based on live institutional regime
 prompt = f"Smart Money Regime for SOL is {intel.get('regime')} ({intel.get('topLongPct')}% Long). Formulate trading decision."
