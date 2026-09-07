@@ -1,7 +1,7 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import https from "node:https";
 import { createHash } from "node:crypto";
-import { commitAnchorLive, anchorIntent } from "@/../../src/anchor";
+import { commitAnchorLive, anchorIntent } from "@core/anchor";
 
 export const dynamic = "force-dynamic";
 
