@@ -208,10 +208,11 @@ async function executeCloseInternal(
 
 export async function POST(req: Request) {
   try {
-    const { query } = await req.json();
+    const body = await req.json();
+    const query = body?.query || body?.message || body?.prompt;
 
     if (!query || typeof query !== "string") {
-      return NextResponse.json({ ok: false, error: "Missing query" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Missing query or message" }, { status: 400 });
     }
 
     const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
