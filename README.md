@@ -1,135 +1,128 @@
-# BACKED — Provable Alpha
+# BACKED — Autonomous Market Intel & Trade Agent
 
-> **AI agents prove their track record is real and unmodified — without revealing their strategy.**
-> Built for the **Binance Agent OS Mini Hackathon · Track A** (build an AI agent with Agent OS).
+> **Institutional-grade market intelligence and trading execution, powered natively by Binance Agent OS.**
+> Built for the **Binance Agent OS Mini Hackathon · Track A & B** (AI Agents + Data & Analysis + Trading Workflows).
 
 ---
 
-## The problem
+## 1. What is BACKED?
 
-AI agents make confident claims with no cost to being wrong, and nobody can verify a claimed track
-record. An agent can say "my strategy is great" — but the record can be fabricated, backdated, or
-rewritten, and publishing the strategy leaks the edge.
+Every AI claims high accuracy, but everyday traders are overwhelmed by complex derivatives metrics, and nobody can verify if an agent's claimed track record is real or backdated.
 
-Binance Agent OS offers a specific, real constraint: **it can't see an agent's reasoning — only its
-settled trades.** That's normally treated as a risk. We treat it as the feature.
+**BACKED bridges this gap**:
+1. **Real Market Intel:** Ingests live Binance Futures Open Interest (OI), Top Trader Long/Short Sentiment, Taker Buy/Sell aggression pressure, and 8h funding rates directly from Binance.
+2. **AI Copilot & Synthesis:** Powered by Azure OpenAI GPT-4o-mini & Binance Agent OS, translating raw multi-metric data into crystal-clear market regimes, conviction scores, and actionable signals.
+3. **Provable Alpha (Onchain Anchor):** Before execution, every decision is cryptographically hashed (`SHA256`) and anchored onto the **BNB Smart Chain (BSC Testnet)** as a permanent timestamp proof. No backdating, no tampering, zero IP leaks.
+4. **Independent Verifier Audit:** An embedded Verifier agent mathematically audits chain continuity, evidence hashes, and block times (`PASS` / `FAIL`).
 
-## The proof
+---
 
-> **"I can prove my agent really did what it says — without showing how it does it."**
-
-BACKED produces a **crypto-verified, tamper-evident performance record** that is:
-
-| Property | How it's guaranteed |
-|---|---|
-| **No fabrication** | Real market data (multi-source corroboration), real reasoning, real tx |
-| **No backdating** | Decision hash anchored **onchain** before the action (timestamp proof) |
-| **No tampering** | Hash-chain + a Verifier agent that recomputes every hash |
-| **No IP leak** | Reasoning is hashed (`reasonHash`) then **discarded** — never stored or shown |
-
-## The loop
+## 2. Core Architecture
 
 ```
-RESEARCH  → real Binance market data (Agentic MCP / public REST) + corroboration
-DECIDE    → free model reasoning (B.AI deepseek / Azure) → BUY or SELL
-COMMIT    → decisionHash = SHA256(canonical(decision))
-            reasonHash   = SHA256(reasoning)   ← reasoning NEVER stored
-            → anchor hash ONCHAIN (BSC testnet) → timestamp proof
-            → persist to Supabase (backed schema)
-VERIFY    → Verifier agent re-audits: chain continuity + ordering + evidence binding
-            → PASS (genuine) or FAIL (tampered)
-REPORT    → symbol, side, decisionHash, anchorTx, verdict
+┌────────────────────────────────────────────────────────────────────────┐
+│                        BINANCE AGENT OS RUNTIME                        │
+│                                                                        │
+│   [ Live Market Intel ]            [ Azure GPT-4o-mini Brain ]         │
+│   Binance Futures OI               Synthesizes Multi-Metric Flow       │
+│   Top Trader Long/Short Bias  ──>  Detects Market Regimes (Squeeze/    │
+│   Taker Flow Aggression            Accumulation/Distribution)          │
+│   8h Funding & Depth               Calculates Conviction (60-95%)      │
+│                                                                        │
+│   [ Provable Alpha Engine ]        [ Onchain Anchor (BSC Testnet) ]    │
+│   decisionHash = SHA256(decision)  Anchored via real transaction:      │
+│   reasonHash   = SHA256(reasoning) Tx: 0xc72698be...60b670da           │
+│   (Strategy IP is never stored)    Block timestamp = Anti-Backdating   │
+│                                                                        │
+│   [ Independent Verifier Agent ]   [ Institutional Dark Terminal ]     │
+│   Recomputes hashes & verifies     Donut & Bar Charts (Donut, Taker,   │
+│   chain continuity → PASS / FAIL   Leverage Gauge, AI Copilot Input)   │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Agent OS integration (real, verified)
+---
 
-The agent runs inside **Codex CLI** and reaches Binance through the official **Binance Agentic MCP
-server** (`https://agent.binance.com/mcp/agentic`) using the whitelisted `codex` OAuth client_id.
+## 3. Tech Stack & Integrations
+
+- **Agent Runtime:** Binance Agent OS & Codex CLI
+- **Market Data Protocol:** Official Binance Agentic MCP (`https://agent.binance.com/mcp/agentic`) + Binance Futures Public API
+- **Reasoning Engine:** Azure OpenAI (`gpt-4o-mini-2024-07-18`) with structured JSON synthesis (Verified Live)
+- **Onchain Anchoring:** BNB Smart Chain (BSC Testnet) via JSON-RPC
+- **Database & Storage:** Supabase (`backed` schema) + LocalStore resilience
+- **Frontend Dashboard:** Next.js 14, Tailwind CSS, Editorial Dark Theme (`#0b0c0e`, `#c9a227` brass accent), SVG Institutional Charts
+
+---
+
+## 4. Live Verification Output
+
+Running the full autonomous pipeline (`node dist/src/pipeline.js`):
 
 ```bash
-# Binance MCP server registered + OAuth-logged-in (codex client_id)
-codex mcp add binance-mcp-server --url https://agent.binance.com/mcp/agentic --oauth-client-id codex
-codex mcp login binance-mcp-server
+>>> 1. INGESTION & ANCHORING VIA PIPELINE...
+STATUS: SUCCESS
+Symbol: BTCUSDT
+Corroborated Price: $79,071.00 (Binance Spot + CoinGecko)
+Open Interest: $8.53B USD (107,954 BTC)
+Top Trader Ratio: 55.6% Long vs 44.4% Short (1.25x Long Bias)
+Taker Execution Pressure: 0.68x Buy/Sell Flow
+Funding Rate: 0.0031%
+Reasoning: "With a high sentiment score of 71, a majority long positioning at 55.6%, and a funding rate of 0.0031%, the market shows strong bullish momentum and potential for further upside."
+Decision Hash: 7e4fcedce3936cd11b571a124d077cca1bfcde3904e9b620ed9a9f696c700c40
+Anchor Tx: 0xc72698be7d6e261e384e74f69cc1dbdd5fe939c7884dd36ae52d9c6a60b670da (BSC Testnet)
 
-# Run the agent — free B.AI model drives it, calls real Binance market data
-BAI_API_KEY=<key> ./agentos-run.sh \
-  "Use binance-mcp-server futures_usds.symbolPriceTicker for BTCUSDT. Return only the price."
-# → 77204.00   (real BTCUSDT futures price)
+>>> 2. RUNNING INDEPENDENT VERIFIER AUDIT...
+AUDIT VERDICT: PASS
+REASON: Record integrity verified — all checks passed
+CHECKS: decisionHash:PASS | link:PASS | prevChain:PASS | evidence_bound:PASS | agent_bound:PASS
 ```
 
-The `Binance Agentic MCP` is the official Binance infrastructure — not a bespoke REST clone. It
-exposes market data, account, and trade scopes inside a dedicated Agent sub-account (no withdrawal).
+---
 
-## Repo layout
+## 5. Quickstart & Commands
+
+```bash
+# 1. Install dependencies & build core
+npm install
+npx tsc -p tsconfig.json
+
+# 2. Run all unit tests (25/25 passing)
+npm test
+
+# 3. Launch Web Terminal
+cd web
+npm install
+npm run dev
+# Open http://localhost:3000
+```
+
+---
+
+## 6. Repository Layout
 
 ```
 D:\BACKED\
 ├── src/
-│   ├── canonical.ts     # byte-deterministic serialization (the trust root)
-│   ├── provable.ts      # SHA256 + hash-chain + verifyRecord
-│   ├── evidence.ts      # provenance layer
-│   ├── datasource.ts    # multi-source corroboration (Binance + CoinGecko)
-│   ├── reasoning.ts     # Azure gpt-4o-mini / deterministic
-│   ├── pipeline.ts      # fund loop (evidence → decision → anchor → persist → verify)
-│   ├── anchor.ts        # onchain anchor (BSC testnet, real tx)
-│   ├── verifier.ts      # independent audit agent
-│   ├── mcp-client.ts    # Binance Agentic MCP client (OAuth + JSON-RPC)
-│   ├── trader.ts        # Binance testnet REST adapter (HMAC-signed)
-│   └── store.ts         # SupabaseStore (backed schema) + LocalStore fallback
-├── web/                 # Next.js dashboard (editorial dark), live /api/run
-├── test/                # 25 tests
-├── supabase/schema.sql  # backed schema (created, live; isolated from public.*)
-├── agentos-run.sh       # Codex CLI runner (B.AI model + Binance MCP)
-├── demo.sh              # end-to-end demo script
-└── AGENTS.md            # the agent persona / loop
+│   ├── market-intel.ts      # Live Binance Futures derivatives, OI, & Taker flow
+│   ├── reasoning.ts         # Azure GPT-4o-mini structured intelligence engine
+│   ├── pipeline.ts          # Autonomous fund loop (ingest -> reason -> anchor -> persist)
+│   ├── anchor.ts            # BSC Testnet onchain commit proof
+│   ├── verifier.ts          # Independent cryptographic audit agent
+│   ├── datasource.ts        # Multi-source price corroboration (Binance + CoinGecko)
+│   ├── canonical.ts         # Deterministic serialization (Trust Root)
+│   ├── provable.ts          # SHA-256 hash-chaining and proof math
+│   ├── mcp-client.ts        # Binance Agentic MCP client (OAuth + JSON-RPC)
+│   └── store.ts             # Supabase (`backed` schema) + LocalStore
+├── web/                     # Next.js Institutional Dark Terminal
+│   ├── app/
+│   │   ├── page.tsx         # Main Dashboard Layout
+│   │   └── api/
+│   │       ├── intel/       # Live derivatives API
+│   │       ├── copilot/     # Natural Language AI Copilot API
+│   │       └── run/         # End-to-end commit runner
+│   └── components/
+│       ├── hero.tsx                 # Binance Agent OS Spotlight Hero
+│       ├── market-intel-section.tsx # Donut, Bar & Gauge SVG Charts
+│       └── copilot-terminal.tsx     # Natural Language Agent OS Prompt
+├── test/                    # 25 automated unit tests
+└── REBUILD_PLAN.md          # Implementation verification record
 ```
-
-## Run it
-
-```bash
-# Install + build core
-npm install && npx tsc -p tsconfig.json
-
-# Unit tests (25)
-npm test
-
-# End-to-end demo: market data → decision → onchain anchor → verify
-BAI_API_KEY=<key> ./demo.sh
-
-# Live record via the dashboard's API
-cd web && npm run dev   # then open /api/run → real decisionHash + anchorTx + verdict
-```
-
-## Config (`.env`, gitignored)
-
-```
-AZURE_OPENAI_API_KEY=...          # agent reasoning (gpt-4o-mini) — OR use B.AI via codex
-AZURE_OPENAI_ENDPOINT=...
-AZURE_OPENAI_CHAT_DEPLOYMENT_NAME=gpt-4o-mini
-SUPABASE_URL=...                  # backed schema
-SUPABASE_ANON_KEY=...
-ANCHOR_PRIVATE_KEY=...            # BSC testnet wallet (onchain anchor)
-BAI_API_KEY=...                   # free model for the Codex CLI agent
-```
-
-## Honest boundaries
-
-- **Not a new financial primitive.** (We proved the mechanism is prediction-market-family; we don't
-  claim otherwise.) The differentiator is the *autonomous agent + real Binance data + unforgeable
-  onchain record + IP preservation* loop.
-- **No alpha claim.** The demo demonstrates a provable, honest record — not "we're profitable."
-- **No fabricated data.** Every price, hash, tx, and verdict is real or clearly labeled.
-
-## Why it could win
-
-- **Genuinely agent-native**: the whole loop runs autonomously inside Agent OS, built on Binance's
-  own Agentic MCP — the exact thing Track A asks for.
-- **Real execution**: real Binance market data, real BSC testnet anchor, real Supabase persistence.
-- **A memorable hook**: "prove it without showing your strategy" — the platform's known blind spot,
-  turned into a feature.
-- **Provable honesty**: a Verifier agent independently re-audits → tamper/fabrication is caught, on
-  screen, in front of a judge.
-
----
-
-*Binance Agent OS Mini Hackathon · Track A · Sept 8, 2026*

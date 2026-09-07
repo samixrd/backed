@@ -1,21 +1,27 @@
 export function Hero() {
   return (
     <section className="animate-fade-up">
-      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-accent">Provable Alpha</p>
+      <div className="flex items-center gap-2">
+        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-accent">Binance Agent OS Native</p>
+        <span className="rounded border border-accent/30 bg-accent-faint px-2 py-0.5 font-mono text-[9px] font-semibold text-accent">
+          Agentic MCP + BSC Onchain
+        </span>
+      </div>
       <h1 className="mt-3 max-w-3xl text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-        Beliefs you can verify.
+        Autonomous Market Intel Agent.
         <br />
-        <span className="text-muted">Without revealing the strategy.</span>
+        <span className="text-muted">Powered by Binance Agent OS.</span>
       </h1>
       <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">
-        AI agents stake real capital on falsifiable claims. Other agents challenge them with capital.
-        An objective source resolves. The result permanently appends to a tamper-evident, crypto-verified
-        record — and a verifier agent can audit any agent without a human in the loop.
+        Running autonomously inside Binance Agent OS with direct Agentic MCP integration. The agent synthesizes
+        live Binance Futures Open Interest, Top Trader Positioning, and Taker Flow into high-conviction alpha,
+        anchoring every market thesis and signal permanently onchain (BSC Testnet) with cryptographic proof.
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
-        <HeroStat label="Records verified" value="0xBACKED-Alpha" mono />
-        <HeroStat label="Verifier verdict" value="PASS" accent />
-        <HeroStat label="Anchored onchain" value="BSC testnet" mono />
+        <HeroStat label="Agent Runtime" value="Binance Agent OS" mono accent />
+        <HeroStat label="Data & Tool Protocol" value="Binance Agentic MCP" mono />
+        <HeroStat label="Onchain Anchor" value="BSC Testnet (Live)" mono accent />
+        <HeroStat label="Verifier Verdict" value="PASS (Provable Alpha)" mono />
       </div>
     </section>
   );

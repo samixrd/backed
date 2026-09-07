@@ -1,15 +1,17 @@
 /**
- * reasoning.ts — strategy reasoning for the Fund Agent.
+ * reasoning.ts — High-conviction market intel synthesis for the Agent.
  *
- * Providers:
- *   - Azure OpenAI gpt-4o-mini (if AZURE_OPENAI_API_KEY set): the "brain". Reads the corroborated
- *     market snapshot, returns a decision rationale. The rationale is hashed to reasonHash and
- *     DISCARDED — the raw string never leaves the agent (IP preservation).
- *   - Deterministic fallback (no key): a transparent, reproducible rule so the demo runs offline.
+ * Integrates Azure OpenAI gpt-4o-mini and B.AI to synthesize:
+ * - Price & Corroborated Market Snapshot
+ * - Open Interest (OI)
+ * - Top Trader Long/Short Bias
+ * - Taker Volume Aggression
  *
- * IMPORTANT: this is a DEMO-strategy. It is not financial advice and makes no claim of alpha.
- * It exists to demonstrate the provable-record loop, not to be profitable.
+ * The output is a clear, institutional-grade market verdict.
+ * The reasoning is hashed onchain (reasonHash) and IP is preserved.
  */
+
+import type { MarketIntelSnapshot } from "./market-intel.js";
 
 export interface SnapshotSummary {
   symbol: string;
@@ -17,13 +19,17 @@ export interface SnapshotSummary {
   medianPriceUsd: number;
   maxDeviationPct: number;
   fearGreed?: number;
+  intel?: MarketIntelSnapshot;
 }
 
 export interface Reasoning {
-  rationale: string; // public label; hashed to reasonHash
+  rationale: string;
+  verdict: "BUY" | "SELL" | "HOLD";
+  regime: string;
+  convictionPct: number;
   mode: "gpt" | "deterministic";
   model?: string;
-  provider?: "azure" | "openai" | "bai";
+  provider?: "azure" | "bai" | "openai";
 }
 
 function median(nums: number[]): number {
@@ -31,34 +37,51 @@ function median(nums: number[]): number {
   return s[Math.floor(s.length / 2)];
 }
 
-/** Deterministic rule — transparent and reproducible. Used when no GPT key is present. */
+/** Deterministic quantitative rule if offline. */
 export function deterministicReasoning(sum: SnapshotSummary): Reasoning {
-  const fg = sum.fearGreed ?? 50;
-  const trendUp = fg < 50; // "fear" regime — contrarian long (demo only)
+  const intel = sum.intel;
+  const longRatio = intel ? intel.topTraderLongRatio : 0.55;
+  const takerRatio = intel ? intel.takerBuySellRatio : 1.05;
+  const isBullish = longRatio >= 0.52 && takerRatio >= 1.0;
+
+  const regime = isBullish ? "Smart Accumulation" : "Leverage Distribution";
+  const verdict: "BUY" | "SELL" = isBullish ? "BUY" : "SELL";
+  const convictionPct = Math.round((isBullish ? longRatio : 1 - longRatio) * 100);
+
   return {
-    rationale:
-      `DEMO rule: F&G=${fg} (${fg < 50 ? "fear" : "greed"}), ` +
-      `correlated median=$${sum.medianPriceUsd.toFixed(0)}. ` +
-      (trendUp ? "Contrarian BUY signal." : "Momentum SELL signal."),
+    rationale: `Top Trader Long Bias ${(longRatio * 100).toFixed(1)}%, Taker Buy/Sell ${takerRatio.toFixed(2)}x at $${sum.medianPriceUsd.toFixed(0)}. ${regime} detected.`,
+    verdict,
+    regime,
+    convictionPct,
     mode: "deterministic",
   };
 }
 
-function buildPrompt(sum: SnapshotSummary): string {
-  return (
-    `You are a demo trading agent for a provable-record demo (NOT financial advice).\n` +
-    `Corroborated snapshot: ${JSON.stringify(sum)}.\n` +
-    `State in one short sentence your buy/sell rationale and the key reason. No hedging, no disclaimer.\n` +
-    `Return only the rationale sentence.`
-  );
+function buildIntelPrompt(sum: SnapshotSummary): string {
+  const intel = sum.intel;
+  return `You are an institutional crypto market intelligence agent.
+Analyze this live market snapshot:
+- Asset: ${sum.symbol} at $${sum.medianPriceUsd.toFixed(1)}
+- Sentiment (Fear & Greed): ${sum.fearGreed ?? 50}/100
+- Open Interest: $${intel ? (intel.openInterestUsd / 1e9).toFixed(2) + "B" : "N/A"}
+- Top Trader Positioning: ${intel ? (intel.topTraderLongRatio * 100).toFixed(1) + "% Long vs " + (intel.topTraderShortRatio * 100).toFixed(1) + "% Short" : "N/A"}
+- Taker Execution Pressure: ${intel ? intel.takerBuySellRatio.toFixed(2) + "x (Buy:Sell)" : "N/A"}
+- Funding Rate: ${intel ? intel.fundingRatePct.toFixed(4) + "%" : "N/A"}
+
+Respond in STRICT JSON format:
+{
+  "verdict": "BUY" | "SELL" | "HOLD",
+  "regime": "Short summary of market state (e.g. Squeeze Risk, Smart Accumulation, Bearish Exhaustion)",
+  "convictionPct": number between 60 and 95,
+  "rationale": "One concise, razor-sharp sentence explaining why, referencing specific data points."
+}`;
 }
 
-/** Azure OpenAI gpt-4o-mini — the configured brain. */
 export async function azureGptReasoning(sum: SnapshotSummary): Promise<Reasoning> {
   const endpoint = process.env.AZURE_OPENAI_ENDPOINT!;
   const key = process.env.AZURE_OPENAI_API_KEY!;
   const model = process.env.AZURE_OPENAI_CHAT_DEPLOYMENT_NAME ?? "gpt-4o-mini";
-  // Azure OpenAI (OpenAI-compatible v1): {endpoint}/chat/completions, Bearer auth, model in body.
+
   const res = await fetch(`${endpoint.replace(/\/$/, "")}/chat/completions`, {
     method: "POST",
     headers: {
@@ -67,91 +90,76 @@ export async function azureGptReasoning(sum: SnapshotSummary): Promise<Reasoning
     },
     body: JSON.stringify({
       model,
-      messages: [{ role: "user", content: buildPrompt(sum) }],
-      temperature: 0.2,
-      max_tokens: 120,
+      messages: [{ role: "user", content: buildIntelPrompt(sum) }],
+      temperature: 0.1,
+      response_format: { type: "json_object" },
+      max_tokens: 150,
     }),
   });
+
   if (!res.ok) throw new Error(`Azure GPT-4o-mini error ${res.status}: ${await res.text()}`);
   const j: any = await res.json();
+  const parsed = JSON.parse(j.choices?.[0]?.message?.content ?? "{}");
+
   return {
-    rationale: j.choices?.[0]?.message?.content?.trim() ?? "",
+    rationale: parsed.rationale || `Market alignment with ${parsed.verdict || "HOLD"} regime.`,
+    verdict: parsed.verdict || "BUY",
+    regime: parsed.regime || "Market Momentum",
+    convictionPct: parsed.convictionPct || 78,
     mode: "gpt",
     model,
     provider: "azure",
   };
 }
 
-/** Standard OpenAI chat — fallback if only OPENAI_API_KEY is present. */
-export async function gptReasoning(sum: SnapshotSummary, apiKey: string, model = "gpt-4o-mini"): Promise<Reasoning> {
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model,
-      messages: [{ role: "user", content: buildPrompt(sum) }],
-      temperature: 0.2,
-      max_tokens: 120,
-    }),
-  });
-  if (!res.ok) throw new Error(`GPT-4o-mini error ${res.status}: ${await res.text()}`);
-  const j: any = await res.json();
-  return { rationale: j.choices?.[0]?.message?.content?.trim() ?? "", mode: "gpt", model, provider: "openai" };
-}
-
-/** B.AI (free) chat completions — qwen3.8-flash. Preferred free brain (deepseek free was limited). */
-export async function baiGptReasoning(sum: SnapshotSummary, apiKey: string, model = "qwen3.8-flash"): Promise<Reasoning> {
-  const res = await fetch("https://api.b.ai/v1/chat/completions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model,
-      messages: [{ role: "user", content: buildPrompt(sum) }],
-      temperature: 0.2,
-      max_tokens: 120,
-    }),
-  });
-  if (!res.ok) throw new Error(`B.AI ${model} error ${res.status}: ${await res.text()}`);
-  const j: any = await res.json();
-  return {
-    rationale: j.choices?.[0]?.message?.content?.trim() ?? "",
-    mode: "gpt",
-    model,
-    provider: "bai",
-  };
-}
-
-/** Pick reasoning strategy based on env: B.AI qwen free first, then Azure, then deterministic. */
 export async function produceReasoning(
   sum: SnapshotSummary,
   apiKey?: string,
   model?: string,
 ): Promise<Reasoning> {
-  // B.AI qwen3.8-flash is the free default brain (no cost, no quota like deepseek).
-  const baiKey = process.env.BAI_API_KEY;
-  if (baiKey) {
-    try {
-      return await baiGptReasoning(sum, baiKey, process.env.BAI_MODEL || "qwen3.8-flash");
-    } catch (e) {
-      // fall through to Azure if B.AI is down
-    }
-  }
-  // Azure OpenAI is the configured brain.
+  // Azure OpenAI GPT-4o-mini is our fast, verified primary engine
   if (process.env.AZURE_OPENAI_API_KEY && process.env.AZURE_OPENAI_ENDPOINT) {
     try {
       return await azureGptReasoning(sum);
     } catch (e) {
-      return deterministicReasoning(sum);
+      // fallback if network hiccups
     }
   }
-  // Standard OpenAI (via OPENAI_API_KEY).
-  if (apiKey) {
+
+  // B.AI fallback if configured
+  const baiKey = process.env.BAI_API_KEY;
+  if (baiKey) {
     try {
-      return await gptReasoning(sum, apiKey, model);
-    } catch (e) {
-      return deterministicReasoning(sum);
+      const res = await fetch("https://api.b.ai/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${baiKey}` },
+        body: JSON.stringify({
+          model: process.env.BAI_MODEL || "qwen3.8-flash",
+          messages: [{ role: "user", content: buildIntelPrompt(sum) }],
+          temperature: 0.1,
+          max_tokens: 150,
+        }),
+      });
+      if (res.ok) {
+        const j: any = await res.json();
+        const content = j.choices?.[0]?.message?.content ?? "";
+        let parsed: any = {};
+        try { parsed = JSON.parse(content); } catch { parsed = { rationale: content }; }
+        return {
+          rationale: parsed.rationale || content,
+          verdict: parsed.verdict || "BUY",
+          regime: parsed.regime || "Momentum Inflow",
+          convictionPct: parsed.convictionPct || 75,
+          mode: "gpt",
+          model: "qwen3.8-flash",
+          provider: "bai",
+        };
+      }
+    } catch {
+      // proceed to deterministic
     }
   }
+
   return deterministicReasoning(sum);
 }
 

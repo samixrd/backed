@@ -19,10 +19,44 @@ export interface PriceQuote {
   observedAt: bigint; // ms epoch
 }
 
+import https from "node:https";
+
+function httpsGetJson<T>(url: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const parsed = new URL(url);
+    const req = https.request(
+      {
+        hostname: parsed.hostname,
+        port: 443,
+        path: parsed.pathname + parsed.search,
+        method: "GET",
+        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" },
+        timeout: 6000,
+      },
+      (res) => {
+        let d = "";
+        res.on("data", (chunk) => (d += chunk));
+        res.on("end", () => {
+          try {
+            resolve(JSON.parse(d));
+          } catch (e) {
+            reject(e);
+          }
+        });
+      }
+    );
+    req.on("error", reject);
+    req.on("timeout", () => {
+      req.destroy();
+      reject(new Error("Timeout"));
+    });
+    req.end();
+  });
+}
+
 /** Fetch BTC spot from Binance public API (primary, no key). */
 export async function binanceBtcPrice(): Promise<PriceQuote> {
-  const res = await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT");
-  const j: any = await res.json();
+  const j: any = await httpsGetJson("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT");
   return {
     source: "binance-spot-ticker",
     priceUsd: parseFloat(j.lastPrice),
@@ -32,8 +66,7 @@ export async function binanceBtcPrice(): Promise<PriceQuote> {
 
 /** Fetch BTC price from CoinGecko (corroboration, no key). */
 export async function coingeckoBtcPrice(): Promise<PriceQuote> {
-  const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd");
-  const j: any = await res.json();
+  const j: any = await httpsGetJson("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd");
   return {
     source: "coingecko-simple-price",
     priceUsd: parseFloat(j.bitcoin.usd),
@@ -43,8 +76,7 @@ export async function coingeckoBtcPrice(): Promise<PriceQuote> {
 
 /** Fear & Greed Index (sentiment), alternative.me — free JSON. */
 export async function fearGreedIndex(): Promise<number> {
-  const res = await fetch("https://api.alternative.me/fng/?limit=1");
-  const j: any = await res.json();
+  const j: any = await httpsGetJson("https://api.alternative.me/fng/?limit=1");
   return parseInt(j.data[0].value, 10);
 }
 

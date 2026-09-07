@@ -51,7 +51,6 @@ export interface PipelineResult {
   anchorTxHash?: string;
   anchorBlockTime?: bigint;
   anchored?: boolean;
-  order?: import("./trader.js").OrderResult;
   verification?: { ok: boolean };
   stored?: boolean;
 }
@@ -65,14 +64,18 @@ export async function runFundPipeline(cfg: PipelineConfig): Promise<PipelineResu
   if (!ev.ok) return { ok: false, step: `evidenze: ${ev.reason}` };
   const snapshots = ev.snapshots;
 
-  // 2. Snapshot summary for the reasoning engine.
+  // 2. Snapshot summary for the reasoning engine + live market intel.
   const fg = await fearGreedIndex().catch(() => undefined);
+  const { fetchMarketIntel } = await import("./market-intel.js");
+  const liveIntel = await fetchMarketIntel("BTCUSDT").catch(() => undefined);
+
   const summary: SnapshotSummary = {
     symbol: "BTCUSDT",
     priceCorelated: snapshots.map((s) => ({ source: s.source, priceUsd: Number(s.price) / 1e8 })),
     medianPriceUsd: ev.explanation.includes("median $") ? parseFloat(ev.explanation.split("median $")[1].split(",")[0]) : 0,
     maxDeviationPct: 0.5,
     fearGreed: fg,
+    intel: liveIntel,
   };
 
   // 3. Reasoning (GPT-4o-mini or deterministic fallback).
@@ -104,25 +107,11 @@ export async function runFundPipeline(cfg: PipelineConfig): Promise<PipelineResu
   const entry: ChainEntry = { decision, link };
 
   // 6. Onchain anchor (timestamp proof). If ANCHOR_PRIVATE_KEY + ANCHOR_TO are set, this commits
-  //    a real tx to BSC testnet and records the blockTime. Otherwise it's a deterministic
-  //    dry-run intent (honestly labeled — never a fake tx hash).
+  //    a real tx to BSC testnet and records the blockTime.
   const { anchorDecisionHash } = await import("./anchor.js");
   const anchor = await anchorDecisionHash(dh);
   entry.anchorBlockTime = anchor.blockTime;
   const anchorTxHash = anchor.anchored ? anchor.txHash : undefined;
-
-  // 6b. Optional real execution (Binance testnet). Only if keys + live flag present;
-  //     otherwise a signed dry-run payload (never fabricates an order id).
-  let order;
-  const binanceKey = process.env.BINANCE_TESTNET_API_KEY;
-  const binanceSecret = process.env.BINANCE_TESTNET_API_SECRET;
-  if (binanceKey && binanceSecret) {
-    const { placeMarketOrder } = await import("./trader.js");
-    order = await placeMarketOrder(
-      { mode: "testnet", apiKey: binanceKey, apiSecret: binanceSecret, live: cfg.liveTrade === true },
-      { symbol: "BTCUSDT", side: cfg.side, quantity: (Number(cfg.qty) / 1e8).toString(), decisionHash: dh },
-    );
-  }
 
   // 7. Persist.
   try {
@@ -158,7 +147,6 @@ export async function runFundPipeline(cfg: PipelineConfig): Promise<PipelineResu
     anchorTxHash,
     anchorBlockTime: anchor.blockTime,
     anchored: anchor.anchored,
-    order,
     verification: { ok: ver.ok },
     stored: true,
   };

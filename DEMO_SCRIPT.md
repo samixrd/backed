@@ -1,65 +1,54 @@
-# BACKED — 90-Second Demo Script
+# BACKED — 90-Second Hackathon Demo Script
 
-> For the Binance Agent OS Mini Hackathon (Track A). A judge should feel the hook in the first 10s
-> and see the verification on screen. Read the **bold** lines aloud; the rest is camera action.
-
-## ACT 1 — The hook (0:00–0:12)
-**"Every AI claims a great track record. You can't trust any of it — it can be faked, backdated, or
-rewritten. And publishing the strategy leaks the edge."**
-
-*Camera:* the dashboard header. Text dissolves to the two-column "confession" card:
-- LEFT: **"I have a great track record."** (a generic agent)
-- RIGHT: **"Prove it without showing your strategy."**
-
-## ACT 2 — The agent is real + autonomous (0:12–0:35)
-**"This agent runs on Binance Agent OS and actually trades. It pulled this live from Binance's own
-MCP — no fake numbers."**
-
-*Camera:* terminal. Run:
-```bash
-./agentos-run.sh "Use binance-mcp-server futures_usds.symbolPriceTicker for BTCUSDT. Return only the price."
-```
-> Terminal prints: `futures_usds.symbolPriceTicker (completed)` → **77204.00**
-
-**"77204.00 — real BTCUSDT futures price, from Binance's Agentic MCP server."**
-
-## ACT 3 — The provable record (0:35–1:05)
-**"Now watch what makes this different. The agent reasoned a decision — but the reasoning is never
-shown. Only a hash of it. Then the decision is locked onchain."**
-
-*Camera:* README/verify output. Point to each:
-- `decisionHash` → SHA256 of the decision
-- `reasonHash` → SHA256 of the reasoning **— never stored**
-- `anchorTx` → **a real BSC testnet transaction** — the timestamp proof, so it **can't be backdated**
-- `Stored` → persisted to Supabase
-
-**"Proof happens before the action. The hash is on the chain before the trade settles."**
-
-## ACT 4 — The verifier catches a lie (1:05–1:35)
-**"But here's the part that matters. Any record can claim to be genuine. So we have a Verifier agent
-that re-audits it — recomputes every hash, checks the chain, checks the ordering."**
-
-*Camera:* run the Verifier on the **genuine** record → **PASS**.
-Then run it on a **tampered** record (a copied one with one field changed) → **FAIL**.
-
-> GENUINE → **verdict: PASS** · TAMPERED → **verdict: FAIL — caught**
-
-**"One honest, one tampered. The verifier tells them apart instantly — because the hash chain is
-unforgeable."**
-
-## ACT 5 — The line (1:35–1:50, the closer)
-**"So now an agent can prove it's real without leaking its edge, and a Verifier can catch a lie in
-seconds. Anyone can claim a track record — now anyone can verify it, without seeing the strategy.
-**That's Backed.**"**
-
-*Camera:* hold on the dashboard — the live record showing decisionHash, anchorTx, and **verdict:
-PASS**.
+> Designed for the **Binance Agent OS Hackathon**. Direct, impactful, showing the live terminal, institutional charts, Binance Agent OS integration, and onchain verification in 90 seconds.
 
 ---
 
-## Submission checklist
-- [ ] GitHub repo link (this project)
-- [ ] Demo video (this 90s script)
-- [ ] Follow @Binance + repost the announcement
-- [ ] Reply/quote with your submission (Track A: video + GitHub)
-- [ ] Complete the Binance survey
+## ACT 1 — The Hook & Problem (0:00–0:15)
+**"Every trading AI claims insane accuracy, but retail traders are drowned in complex metrics, and there is zero proof of a real track record without backdating or leaking strategy IP. We solve both."**
+
+*Camera:* The BACKED Terminal UI.
+- Highlight the **Binance Agent OS Native** hero badge.
+- Highlight the live ticker: **BTCUSDT Live Price, OI, and Top Trader Long/Short Bias**.
+
+---
+
+## ACT 2 — Live Market Intel & AI Copilot (0:15–0:40)
+**"Running natively inside Binance Agent OS, BACKED ingests real-time Binance Futures Open Interest, Top Trader Long/Short sentiment, and aggressive Taker volume."**
+
+*Camera:* Point to the three institutional SVG charts:
+1. **Top Trader Sentiment Donut Chart** (e.g. 55.6% Long).
+2. **Taker Flow Pressure Bar Chart** (Buy vs Sell imbalance).
+3. **Funding & Leverage Overheat Gauge**.
+
+**"Users don't need to stare at complex charts. They can simply ask the Binance Agent OS Copilot:"**
+*Action:* Click query chip or type *"What are top traders doing on BTC right now?"*
+*Copilot outputs:* Concise, institutional briefing based on live Binance derivatives.
+
+---
+
+## ACT 3 — Provable Alpha Onchain Commit (0:40–1:05)
+**"When the agent makes a trade decision, it preserves proprietary IP: reasoning is hashed into `reasonHash` and instantly discarded. Then the decision hash is anchored directly onchain to the BNB Smart Chain (BSC Testnet)."**
+
+*Camera:* Run terminal:
+```bash
+node dist/src/pipeline.js
+```
+*Output shown:*
+- `Decision Hash:` e.g. `7e4fcedce...`
+- `BSC Testnet Tx:` e.g. `0xc72698be7d6e261e384e74f69cc1dbdd5fe939c7884dd36ae52d9c6a60b670da`
+- **"The timestamp is locked onchain before execution. It can never be backdated or modified."**
+
+---
+
+## ACT 4 — Independent Verifier Catches Tampering (1:05–1:25)
+**"Any AI can claim a track record. But BACKED features an independent Verifier Agent that re-audits every hash, chain link, and timestamp."**
+
+*Camera:* Run Verifier:
+- Genuine record: **`AUDIT VERDICT: PASS`**
+- Show a tampered record: **`AUDIT VERDICT: FAIL` (Caught instantly!)**
+
+---
+
+## ACT 5 — The Closer (1:25–1:35)
+**"Real Binance market intel, everyday user simplicity, and cryptographically provable alpha on the BNB Smart Chain. That is BACKED on Binance Agent OS."**
