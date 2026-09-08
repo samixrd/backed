@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 
 interface AssetRow {
   symbol: string;
@@ -35,17 +35,20 @@ interface NodePoint {
   regime: string;
   bullish: boolean;
   baseRadius: number;
-  // Physics coordinates
-  originX: number;
-  originY: number;
+  // World data coordinates
+  dataX: number; // longPct (20..85)
+  dataY: number; // takerRatio (0.4..2.5)
+  // Current screen/world canvas coordinates
   x: number;
   y: number;
+  originX: number;
+  originY: number;
   vx: number;
   vy: number;
   isDragging?: boolean;
 }
 
-// Interactive Physics-based Moveable Smart Money Radar Map
+// Interactive Modern Fintech Moveable Smart Money Map
 function MoveableSmartMoneyMap({
   assets,
   onSelectCoin,
@@ -56,7 +59,7 @@ function MoveableSmartMoneyMap({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(1.0);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [filter, setFilter] = useState<"all" | "top10" | "accum" | "dist">("all");
   const [physicsOn, setPhysicsOn] = useState(true);
@@ -71,22 +74,12 @@ function MoveableSmartMoneyMap({
   const panStartRef = useRef({ x: 0, y: 0 });
   const mousePosRef = useRef({ x: 0, y: 0 });
 
-  const W = 760;
-  const H = 460;
-  const PAD = 50;
-  const innerW = W - PAD * 2;
-  const innerH = H - PAD * 2;
-  const minX = 20, maxX = 85;
-  const minY = 0.4, maxY = 2.6;
-
-  function toScreenX(v: number) {
-    const clamped = Math.max(minX, Math.min(maxX, v));
-    return PAD + ((clamped - minX) / (maxX - minX)) * innerW;
-  }
-  function toScreenY(v: number) {
-    const clamped = Math.max(minY, Math.min(maxY, v));
-    return PAD + innerH - ((clamped - minY) / (maxY - minY)) * innerH;
-  }
+  const PAD_LEFT = 50;
+  const PAD_RIGHT = 20;
+  const PAD_TOP = 25;
+  const PAD_BOTTOM = 35;
+  const minDataX = 20, maxDataX = 85;
+  const minDataY = 0.4, maxDataY = 2.5;
 
   // Initialize or update nodes from assets
   useEffect(() => {
@@ -96,14 +89,11 @@ function MoveableSmartMoneyMap({
     const maxOI = Math.max(...valid.map((a) => a.openInterestUsd ?? 0), 1);
 
     const newNodes: NodePoint[] = valid.map((a) => {
-      const origX = toScreenX(a.longPct as number);
-      const origY = toScreenY(a.takerRatio as number);
       const oiVal = a.openInterestUsd ?? 0;
-      // Proportional radius with min/max
-      const r = Math.max(6, Math.min(26, 6 + Math.sqrt(oiVal / maxOI) * 20));
+      // Proportional radius: BTC/ETH get ~22-26px, smaller ones get 10-14px
+      const r = Math.max(9, Math.min(26, 9 + Math.sqrt(oiVal / maxOI) * 17));
       const isBull = (a.longPct as number) >= 55 && (a.takerRatio as number) >= 1.0;
 
-      // Retain existing position if already existing
       const existing = nodesRef.current.find((n) => n.symbol === a.symbol);
       return {
         id: a.symbol,
@@ -111,16 +101,18 @@ function MoveableSmartMoneyMap({
         symbol: a.symbol,
         longPct: a.longPct as number,
         takerRatio: a.takerRatio as number,
+        dataX: a.longPct as number,
+        dataY: a.takerRatio as number,
         oi: oiVal,
         price: a.price,
         priceChange24h: a.priceChange24h,
         regime: a.regime,
         bullish: isBull,
         baseRadius: r,
-        originX: origX,
-        originY: origY,
-        x: existing ? existing.x : origX,
-        y: existing ? existing.y : origY,
+        originX: 0,
+        originY: 0,
+        x: existing ? existing.x : 0,
+        y: existing ? existing.y : 0,
         vx: existing ? existing.vx : 0,
         vy: existing ? existing.vy : 0,
       };
@@ -140,8 +132,8 @@ function MoveableSmartMoneyMap({
       if (!ctx) return;
 
       const dpr = window.devicePixelRatio || 1;
-      const displayW = canvas.clientWidth || W;
-      const displayH = canvas.clientHeight || H;
+      const displayW = canvas.clientWidth || 800;
+      const displayH = canvas.clientHeight || 460;
 
       if (canvas.width !== displayW * dpr || canvas.height !== displayH * dpr) {
         canvas.width = displayW * dpr;
@@ -152,101 +144,132 @@ function MoveableSmartMoneyMap({
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, displayW, displayH);
 
-      // Apply Pan & Zoom transformation centered
-      ctx.translate(pan.x + displayW / 2, pan.y + displayH / 2);
-      ctx.scale(zoom, zoom);
-      ctx.translate(-W / 2, -H / 2);
+      // Plot Area Dimensions
+      const plotW = displayW - PAD_LEFT - PAD_RIGHT;
+      const plotH = displayH - PAD_TOP - PAD_BOTTOM;
+      const plotCenterX = PAD_LEFT + plotW / 2;
+      const plotCenterY = PAD_TOP + plotH / 2;
 
-      // ── 1. Draw Grid & Quadrants ──
-      // Subtle background grid
-      ctx.strokeStyle = "#1a1d24";
+      function dataToWorldX(vx: number) {
+        const norm = (vx - minDataX) / (maxDataX - minDataX);
+        return PAD_LEFT + norm * plotW;
+      }
+      function dataToWorldY(vy: number) {
+        const norm = (vy - minDataY) / (maxDataY - minDataY);
+        return PAD_TOP + plotH - norm * plotH;
+      }
+
+      // Update node target positions to match dynamic canvas size
+      const nodes = nodesRef.current;
+      for (const node of nodes) {
+        node.originX = dataToWorldX(node.dataX);
+        node.originY = dataToWorldY(node.dataY);
+        if (node.x === 0 && node.y === 0) {
+          node.x = node.originX;
+          node.y = node.originY;
+        }
+      }
+
+      // ── 1. Draw Full Background and Grid Across Entire Canvas ──
+      ctx.fillStyle = "#0c0e12";
+      ctx.fillRect(0, 0, displayW, displayH);
+
+      // Clip drawing inside the plot area for the transformed elements
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(PAD_LEFT, PAD_TOP, plotW, plotH);
+      ctx.clip();
+
+      // Apply Pan & Zoom transformation relative to plot center
+      ctx.translate(pan.x + plotCenterX, pan.y + plotCenterY);
+      ctx.scale(zoom, zoom);
+      ctx.translate(-plotCenterX, -plotCenterY);
+
+      // Grid Lines
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
       ctx.lineWidth = 1;
+
       for (let v = 25; v <= 80; v += 10) {
-        const gx = toScreenX(v);
+        const gx = dataToWorldX(v);
         ctx.beginPath();
-        ctx.moveTo(gx, PAD);
-        ctx.lineTo(gx, H - PAD);
+        ctx.moveTo(gx, -displayH * 2);
+        ctx.lineTo(gx, displayH * 3);
         ctx.stroke();
       }
       for (let v = 0.6; v <= 2.4; v += 0.3) {
-        const gy = toScreenY(v);
+        const gy = dataToWorldY(v);
         ctx.beginPath();
-        ctx.moveTo(PAD, gy);
-        ctx.lineTo(W - PAD, gy);
+        ctx.moveTo(-displayW * 2, gy);
+        ctx.lineTo(displayW * 3, gy);
         ctx.stroke();
       }
 
-      // Threshold Reference Crosshairs
-      const crossX = toScreenX(55);
-      const crossY = toScreenY(1.0);
+      // Threshold Reference Crosshairs (55% Long and 1.0 Taker Ratio)
+      const crossX = dataToWorldX(55);
+      const crossY = dataToWorldY(1.0);
 
       ctx.save();
-      ctx.setLineDash([4, 4]);
-      ctx.strokeStyle = "rgba(201, 162, 39, 0.4)";
+      ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = "rgba(201, 162, 39, 0.45)";
       ctx.lineWidth = 1.2;
       ctx.beginPath();
-      ctx.moveTo(crossX, PAD);
-      ctx.lineTo(crossX, H - PAD);
-      ctx.moveTo(PAD, crossY);
-      ctx.lineTo(W - PAD, crossY);
+      ctx.moveTo(crossX, -displayH * 2);
+      ctx.lineTo(crossX, displayH * 3);
+      ctx.moveTo(-displayW * 2, crossY);
+      ctx.lineTo(displayW * 3, crossY);
       ctx.stroke();
       ctx.restore();
 
-      // Quadrant Ambient Aura Gradients
-      // Smart Accumulation (Top Right)
-      const accumGrad = ctx.createRadialGradient(toScreenX(70), toScreenY(1.8), 10, toScreenX(70), toScreenY(1.8), 160);
-      accumGrad.addColorStop(0, "rgba(59, 164, 104, 0.08)");
-      accumGrad.addColorStop(1, "transparent");
-      ctx.fillStyle = accumGrad;
-      ctx.fillRect(crossX, PAD, (W - PAD) - crossX, crossY - PAD);
+      // Quadrant Subtle Tint Overlays
+      // Top-Right: Smart Accumulation
+      ctx.fillStyle = "rgba(16, 185, 129, 0.04)";
+      ctx.fillRect(crossX, -displayH * 2, displayW * 3, crossY - (-displayH * 2));
 
-      // Distribution Zone (Bottom Left)
-      const distGrad = ctx.createRadialGradient(toScreenX(35), toScreenY(0.6), 10, toScreenX(35), toScreenY(0.6), 160);
-      distGrad.addColorStop(0, "rgba(208, 83, 83, 0.08)");
-      distGrad.addColorStop(1, "transparent");
-      ctx.fillStyle = distGrad;
-      ctx.fillRect(PAD, crossY, crossX - PAD, (H - PAD) - crossY);
+      // Bottom-Left: Distribution Zone
+      ctx.fillStyle = "rgba(244, 63, 94, 0.04)";
+      ctx.fillRect(-displayW * 2, crossY, crossX - (-displayW * 2), displayH * 3);
 
-      // Quadrant Watermark Labels
-      ctx.font = "bold 9px monospace";
-      ctx.fillStyle = "rgba(59, 164, 104, 0.45)";
-      ctx.fillText("SMART ACCUMULATION ZONE (High Longs + High Taker)", toScreenX(58), toScreenY(2.45));
-      ctx.fillStyle = "rgba(208, 83, 83, 0.45)";
-      ctx.fillText("DISTRIBUTION ZONE (Low Longs + High Selling)", toScreenX(23), toScreenY(0.48));
-      ctx.fillStyle = "rgba(201, 162, 39, 0.35)";
-      ctx.fillText("SQUEEZE WATCH (Short Crowded)", toScreenX(23), toScreenY(2.45));
-      ctx.fillStyle = "rgba(168, 85, 247, 0.35)";
-      ctx.fillText("TRAPPED LONGS (Exhaustion)", toScreenX(62), toScreenY(0.48));
+      // Quadrant Modern Minimalist Watermarks
+      ctx.font = "600 10px monospace";
+      ctx.fillStyle = "rgba(16, 185, 129, 0.35)";
+      ctx.fillText("SMART ACCUMULATION (Longs >= 55% · Taker >= 1.0x)", crossX + 15, crossY - 15);
 
-      // ── 2. Physics Simulation Step (Collision Avoidance & Spring Restitution) ──
-      const nodes = nodesRef.current;
+      ctx.fillStyle = "rgba(244, 63, 94, 0.35)";
+      ctx.fillText("DISTRIBUTION ZONE (Longs < 50% · Net Selling)", crossX - 270, crossY + 25);
+
+      ctx.fillStyle = "rgba(201, 162, 39, 0.3)";
+      ctx.fillText("SQUEEZE RADAR (Short Crowded)", crossX - 230, crossY - 15);
+
+      ctx.fillStyle = "rgba(168, 85, 247, 0.3)";
+      ctx.fillText("TRAPPED LONGS (Buyer Exhaustion)", crossX + 15, crossY + 25);
+
+      // ── 2. Physics Simulation (Spring Restitution + Collision Repulsion) ──
       const dragging = draggingNodeRef.current;
-
       if (physicsOn) {
         for (let i = 0; i < nodes.length; i++) {
           const n1 = nodes[i];
           if (n1 === dragging) continue;
 
-          // Spring force pulling node back to its data origin
-          const kSpring = unpackOn ? 0.04 : 0.12;
+          // Spring pull towards true data coordinates
+          const kSpring = unpackOn ? 0.05 : 0.12;
           const fx = (n1.originX - n1.x) * kSpring;
           const fy = (n1.originY - n1.y) * kSpring;
-          n1.vx = (n1.vx + fx) * 0.78;
-          n1.vy = (n1.vy + fy) * 0.78;
+          n1.vx = (n1.vx + fx) * 0.76;
+          n1.vy = (n1.vy + fy) * 0.76;
 
-          // Collision repulsion between nodes so overlapping circles unpack
+          // Collision Repulsion so bubbles do NOT overlap messily
           if (unpackOn) {
             for (let j = i + 1; j < nodes.length; j++) {
               const n2 = nodes[j];
               const dx = n2.x - n1.x;
               const dy = n2.y - n1.y;
-              const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+              const dist = Math.hypot(dx, dy) || 1;
               const minDist = n1.baseRadius + n2.baseRadius + 6;
 
               if (dist < minDist) {
                 const overlap = (minDist - dist) * 0.5;
-                const repX = (dx / dist) * overlap * 0.15;
-                const repY = (dy / dist) * overlap * 0.15;
+                const repX = (dx / dist) * overlap * 0.14;
+                const repY = (dy / dist) * overlap * 0.14;
                 if (n1 !== dragging) {
                   n1.vx -= repX;
                   n1.vy -= repY;
@@ -259,18 +282,17 @@ function MoveableSmartMoneyMap({
             }
           }
 
-          // Gentle ambient drift for realistic alive sensation
           n1.x += n1.vx;
           n1.y += n1.vy;
         }
       }
 
-      // ── 3. Draw Tether Lines for Displaced/Dragged Nodes ──
+      // ── 3. Draw Tether Line When Node Is Pulled ──
       for (const node of nodes) {
         const distFromOrigin = Math.hypot(node.x - node.originX, node.y - node.originY);
         if (distFromOrigin > 8 || node === dragging) {
           ctx.save();
-          ctx.strokeStyle = node.bullish ? "rgba(59, 164, 104, 0.35)" : "rgba(208, 83, 83, 0.35)";
+          ctx.strokeStyle = node.bullish ? "rgba(52, 211, 153, 0.45)" : "rgba(248, 113, 113, 0.45)";
           ctx.lineWidth = 1;
           ctx.setLineDash([2, 2]);
           ctx.beginPath();
@@ -278,18 +300,17 @@ function MoveableSmartMoneyMap({
           ctx.lineTo(node.x, node.y);
           ctx.stroke();
 
-          // Small origin anchor dot
-          ctx.fillStyle = "rgba(201, 162, 39, 0.5)";
+          // Small anchor point at true data coordinate
+          ctx.fillStyle = "rgba(201, 162, 39, 0.7)";
           ctx.beginPath();
-          ctx.arc(node.originX, node.originY, 2, 0, Math.PI * 2);
+          ctx.arc(node.originX, node.originY, 2.5, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
         }
       }
 
-      // ── 4. Draw Bubbles (Orbs) ──
+      // ── 4. Draw Modern Fintech Bubbles (Clean Frosted Glass & Neon Accents) ──
       for (const node of nodes) {
-        // Filter evaluation
         if (filter === "accum" && !node.bullish) continue;
         if (filter === "dist" && node.bullish) continue;
         if (filter === "top10" && node.oi < 100_000_000) continue;
@@ -297,91 +318,117 @@ function MoveableSmartMoneyMap({
 
         const isHovered = hoveredNode?.id === node.id;
         const isSelected = selectedNode?.id === node.id;
-        const r = node.baseRadius * (isHovered ? 1.25 : isSelected ? 1.15 : 1.0);
+        const r = node.baseRadius * (isHovered ? 1.22 : isSelected ? 1.15 : 1.0);
 
-        // Outer glow
-        const glowColor = node.bullish ? "rgba(59, 164, 104, 0.45)" : "rgba(208, 83, 83, 0.45)";
-        if (isHovered || isSelected || node.oi > 1_000_000_000) {
-          const auraGrad = ctx.createRadialGradient(node.x, node.y, r * 0.4, node.x, node.y, r * 2.2);
-          auraGrad.addColorStop(0, glowColor);
-          auraGrad.addColorStop(1, "transparent");
-          ctx.fillStyle = auraGrad;
+        // Ambient outer glow for high-conviction / high-OI coins
+        if (node.oi > 800_000_000 || isHovered || isSelected) {
+          const glowGrad = ctx.createRadialGradient(node.x, node.y, r * 0.7, node.x, node.y, r * 1.8);
+          glowGrad.addColorStop(0, node.bullish ? "rgba(16, 185, 129, 0.35)" : "rgba(244, 63, 94, 0.35)");
+          glowGrad.addColorStop(1, "transparent");
+          ctx.fillStyle = glowGrad;
           ctx.beginPath();
-          ctx.arc(node.x, node.y, r * 2.2, 0, Math.PI * 2);
+          ctx.arc(node.x, node.y, r * 1.8, 0, Math.PI * 2);
           ctx.fill();
         }
 
-        // Main Orb Body (3D Glass Sphere gradient)
-        const orbGrad = ctx.createRadialGradient(
-          node.x - r * 0.3,
-          node.y - r * 0.3,
-          r * 0.1,
-          node.x,
-          node.y,
-          r
-        );
-        if (node.bullish) {
-          orbGrad.addColorStop(0, "#4ade80");
-          orbGrad.addColorStop(0.4, "#22c55e");
-          orbGrad.addColorStop(0.85, "#15803d");
-          orbGrad.addColorStop(1, "#052e16");
-        } else {
-          orbGrad.addColorStop(0, "#f87171");
-          orbGrad.addColorStop(0.4, "#ef4444");
-          orbGrad.addColorStop(0.85, "#b91c1c");
-          orbGrad.addColorStop(1, "#450a0a");
-        }
-
+        // Modern Glassmorphic Disc
         ctx.beginPath();
         ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
-        ctx.fillStyle = orbGrad;
+        // Translucent dark-frosted background
+        ctx.fillStyle = node.bullish
+          ? (isHovered ? "rgba(16, 185, 129, 0.38)" : "rgba(16, 185, 129, 0.18)")
+          : (isHovered ? "rgba(244, 63, 94, 0.38)" : "rgba(244, 63, 94, 0.18)");
         ctx.fill();
 
-        // Rim Light & Border
-        ctx.lineWidth = isHovered || isSelected ? 2.2 : 1.2;
-        ctx.strokeStyle = isHovered ? "#ffffff" : node.bullish ? "#86efac" : "#fca5a5";
+        // Crisp Modern Border
+        ctx.lineWidth = isHovered || isSelected ? 2.0 : 1.2;
+        ctx.strokeStyle = isHovered
+          ? "#ffffff"
+          : node.bullish
+          ? "rgba(52, 211, 153, 0.85)"
+          : "rgba(251, 113, 133, 0.85)";
         ctx.stroke();
 
-        // Specular highlight dot for realistic glass sheen
+        // Inner soft highlight ring for depth
         ctx.beginPath();
-        ctx.arc(node.x - r * 0.35, node.y - r * 0.35, r * 0.22, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
-        ctx.fill();
+        ctx.arc(node.x, node.y, Math.max(1, r - 2), 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
 
-        // Coin Label Badge (Centered inside or above)
-        ctx.font = `bold ${Math.max(9, Math.min(13, r * 0.75))}px monospace`;
+        // Typography: Bold symbol + optional metric subtext
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 
-        if (r >= 13) {
-          // Inside bubble
+        if (r >= 17) {
+          // Large bubble (BTC, ETH, SOL): Symbol + Metric
+          ctx.font = "bold 11px monospace";
+          ctx.fillStyle = "#ffffff";
+          ctx.fillText(node.label, node.x, node.y - 4);
+
+          ctx.font = "600 8px monospace";
+          ctx.fillStyle = node.bullish ? "rgba(167, 243, 208, 0.9)" : "rgba(254, 205, 211, 0.9)";
+          ctx.fillText(fmtUsd(node.oi), node.x, node.y + 6);
+        } else if (r >= 12) {
+          // Medium bubble: Symbol centered
+          ctx.font = "bold 9px monospace";
           ctx.fillStyle = "#ffffff";
           ctx.fillText(node.label, node.x, node.y);
         } else {
-          // Above bubble with dark backing
-          ctx.fillStyle = isHovered ? "#ffffff" : "#cbd5e1";
-          ctx.fillText(node.label, node.x, node.y - r - 5);
+          // Small bubble: Dot with clean text above
+          ctx.font = "bold 8px monospace";
+          ctx.fillStyle = isHovered ? "#ffffff" : "rgba(226, 232, 240, 0.85)";
+          ctx.fillText(node.label, node.x, node.y - r - 4);
         }
       }
 
-      // ── 5. Draw Axis Labels ──
-      ctx.restore(); // Restore to normal canvas coordinate space
+      ctx.restore(); // Restore plot area clipping
 
-      // Axis Bar Backgrounds
-      ctx.fillStyle = "#14161b";
-      ctx.fillRect(0, H - 28, W, 28);
-      ctx.fillRect(0, 0, 36, H);
+      // ── 5. Fixed Crisp Frame & Axes (Never clips, jumps, or shrinks!) ──
+      // Left Y-Axis Bar
+      ctx.fillStyle = "#0c0e12";
+      ctx.fillRect(0, 0, PAD_LEFT, displayH);
+      // Bottom X-Axis Bar
+      ctx.fillRect(0, displayH - PAD_BOTTOM, displayW, PAD_BOTTOM);
 
+      // Plot border line
+      ctx.strokeStyle = "#232730";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(PAD_LEFT, PAD_TOP, plotW, plotH);
+
+      // X-Axis Scale Ticks & Labels
+      ctx.font = "500 9px monospace";
+      ctx.fillStyle = "#64748b";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      for (let v = 20; v <= 80; v += 10) {
+        const sx = dataToWorldX(v);
+        if (sx >= PAD_LEFT && sx <= displayW - PAD_RIGHT) {
+          ctx.fillText(`${v}%`, sx, displayH - PAD_BOTTOM + 4);
+        }
+      }
       ctx.fillStyle = "#94a3b8";
       ctx.font = "bold 9px monospace";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "alphabetic";
-      ctx.fillText("Top Trader Long % (Account Bias →)", W / 2, H - 10);
+      ctx.fillText("Top Trader Long % (Account Ratio Bias →)", PAD_LEFT + plotW / 2, displayH - 14);
+
+      // Y-Axis Scale Ticks & Labels
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#64748b";
+      for (let v = 0.5; v <= 2.3; v += 0.4) {
+        const sy = dataToWorldY(v);
+        if (sy >= PAD_TOP && sy <= displayH - PAD_BOTTOM) {
+          ctx.fillText(`${v.toFixed(1)}x`, PAD_LEFT - 6, sy);
+        }
+      }
 
       ctx.save();
-      ctx.translate(14, H / 2);
+      ctx.translate(14, PAD_TOP + plotH / 2);
       ctx.rotate(-Math.PI / 2);
-      ctx.fillText("Taker Buy / Sell Aggression Flow (↑)", 0, 0);
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "bold 9px monospace";
+      ctx.fillText("Taker Buy / Sell Flow Ratio (↑)", 0, 0);
       ctx.restore();
 
       animId = requestAnimationFrame(render);
@@ -391,32 +438,35 @@ function MoveableSmartMoneyMap({
     return () => cancelAnimationFrame(animId);
   }, [zoom, pan, filter, physicsOn, unpackOn, hoveredNode, selectedNode, searchQuery]);
 
-  // Mouse & Touch Event Handlers for Moveable Dragging and Pan/Zoom
-  function getCanvasCoords(e: React.MouseEvent<HTMLCanvasElement>) {
+  // World coordinates mapping from mouse client
+  function getCanvasWorldCoords(e: React.MouseEvent<HTMLCanvasElement>) {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
     const clientX = e.clientX - rect.left;
     const clientY = e.clientY - rect.top;
 
-    // Invert pan & zoom to find world space coordinate
-    const displayW = canvas.clientWidth || W;
-    const displayH = canvas.clientHeight || H;
+    const displayW = canvas.clientWidth || 800;
+    const displayH = canvas.clientHeight || 460;
+    const plotW = displayW - PAD_LEFT - PAD_RIGHT;
+    const plotH = displayH - PAD_TOP - PAD_BOTTOM;
+    const plotCenterX = PAD_LEFT + plotW / 2;
+    const plotCenterY = PAD_TOP + plotH / 2;
 
-    const centeredX = clientX - (pan.x + displayW / 2);
-    const centeredY = clientY - (pan.y + displayH / 2);
+    const centeredX = clientX - (pan.x + plotCenterX);
+    const centeredY = clientY - (pan.y + plotCenterY);
 
-    const worldX = centeredX / zoom + W / 2;
-    const worldY = centeredY / zoom + H / 2;
+    const worldX = centeredX / zoom + plotCenterX;
+    const worldY = centeredY / zoom + plotCenterY;
 
     return { x: worldX, y: worldY };
   }
 
   function handleMouseDown(e: React.MouseEvent<HTMLCanvasElement>) {
-    const { x, y } = getCanvasCoords(e);
+    const { x, y } = getCanvasWorldCoords(e);
     mousePosRef.current = { x: e.clientX, y: e.clientY };
 
-    // Check if user clicked on a node to drag it
+    // Check if clicked a node
     const clickedNode = nodesRef.current.find((n) => {
       const dist = Math.hypot(n.x - x, n.y - y);
       return dist <= n.baseRadius + 6;
@@ -427,17 +477,15 @@ function MoveableSmartMoneyMap({
       setSelectedNode(clickedNode);
       onSelectCoin(clickedNode.symbol);
     } else {
-      // Background pan
       isPanningRef.current = true;
       panStartRef.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
     }
   }
 
   function handleMouseMove(e: React.MouseEvent<HTMLCanvasElement>) {
-    const { x, y } = getCanvasCoords(e);
+    const { x, y } = getCanvasWorldCoords(e);
 
     if (draggingNodeRef.current) {
-      // User is dragging a node!
       draggingNodeRef.current.x = x;
       draggingNodeRef.current.y = y;
       draggingNodeRef.current.vx = 0;
@@ -453,7 +501,6 @@ function MoveableSmartMoneyMap({
       return;
     }
 
-    // Hover detection
     const found = nodesRef.current.find((n) => {
       const dist = Math.hypot(n.x - x, n.y - y);
       return dist <= n.baseRadius + 6;
@@ -468,8 +515,14 @@ function MoveableSmartMoneyMap({
 
   function handleWheel(e: React.WheelEvent<HTMLCanvasElement>) {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    setZoom((prev) => Math.max(0.65, Math.min(2.8, prev + delta)));
+    const delta = e.deltaY > 0 ? -0.08 : 0.08;
+    setZoom((prev) => Math.max(0.85, Math.min(2.5, prev + delta)));
+  }
+
+  function handleResetView() {
+    setZoom(1.0);
+    setPan({ x: 0, y: 0 });
+    setSelectedNode(null);
   }
 
   return (
@@ -523,19 +576,19 @@ function MoveableSmartMoneyMap({
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => setUnpackOn(!unpackOn)}
-            className={`px-2 py-0.5 rounded border text-[10px] font-bold transition-colors ${
+            className={`px-2.5 py-0.5 rounded border text-[10px] font-bold transition-colors ${
               unpackOn
-                ? "border-accent/40 bg-accent/15 text-accent"
+                ? "border-accent/50 bg-accent/15 text-accent"
                 : "border-border bg-background text-muted"
             }`}
-            title="Automatically repel overlapping bubbles so labels are clearly visible"
+            title="Repel overlapping bubbles so labels are clearly visible"
           >
             🧲 Unpack Overlap: {unpackOn ? "ON" : "OFF"}
           </button>
 
           <button
             onClick={() => setPhysicsOn(!physicsOn)}
-            className={`px-2 py-0.5 rounded border text-[10px] font-bold transition-colors ${
+            className={`px-2.5 py-0.5 rounded border text-[10px] font-bold transition-colors ${
               physicsOn
                 ? "border-success/40 bg-success/15 text-success"
                 : "border-border bg-background text-muted"
@@ -548,27 +601,24 @@ function MoveableSmartMoneyMap({
           {/* Zoom Buttons */}
           <div className="flex items-center gap-0.5 bg-background border border-border rounded p-0.5">
             <button
-              onClick={() => setZoom((z) => Math.min(2.8, z + 0.2))}
-              className="px-1.5 py-0.5 text-xs text-muted hover:text-foreground hover:bg-surface-raised rounded"
+              onClick={() => setZoom((z) => Math.min(2.5, z + 0.15))}
+              className="px-2 py-0.5 text-xs text-muted hover:text-foreground hover:bg-surface-raised rounded"
               title="Zoom In"
             >
               +
             </button>
-            <span className="px-1 text-[9px] text-faint font-mono">{(zoom * 100).toFixed(0)}%</span>
+            <span className="px-1.5 text-[9px] text-faint font-mono">{(zoom * 100).toFixed(0)}%</span>
             <button
-              onClick={() => setZoom((z) => Math.max(0.65, z - 0.2))}
-              className="px-1.5 py-0.5 text-xs text-muted hover:text-foreground hover:bg-surface-raised rounded"
+              onClick={() => setZoom((z) => Math.max(0.85, z - 0.15))}
+              className="px-2 py-0.5 text-xs text-muted hover:text-foreground hover:bg-surface-raised rounded"
               title="Zoom Out"
             >
               -
             </button>
             <button
-              onClick={() => {
-                setZoom(1);
-                setPan({ x: 0, y: 0 });
-              }}
-              className="px-1.5 py-0.5 text-[9px] text-accent hover:underline rounded ml-0.5"
-              title="Reset View"
+              onClick={handleResetView}
+              className="px-2 py-0.5 text-[9px] text-accent hover:underline rounded ml-0.5 font-bold"
+              title="Reset View and Center"
             >
               ↺ Reset
             </button>
@@ -576,8 +626,8 @@ function MoveableSmartMoneyMap({
         </div>
       </div>
 
-      {/* ── Canvas Container with Moveable Orbs ── */}
-      <div className="relative rounded-xl border border-border bg-background overflow-hidden shadow-inner">
+      {/* ── Modern Canvas Viewport ── */}
+      <div className="relative rounded-xl border border-border bg-[#0c0e12] overflow-hidden shadow-2xl">
         <canvas
           ref={canvasRef}
           onMouseDown={handleMouseDown}
@@ -585,16 +635,16 @@ function MoveableSmartMoneyMap({
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
           onWheel={handleWheel}
-          style={{ width: "100%", height: "440px", cursor: draggingNodeRef.current ? "grabbing" : hoveredNode ? "grab" : "default" }}
+          style={{ width: "100%", height: "450px", cursor: draggingNodeRef.current ? "grabbing" : hoveredNode ? "grab" : "default" }}
         />
 
-        {/* Moveable Interaction Tip Pill */}
-        <div className="absolute top-2 left-2 bg-black/60 backdrop-blur border border-border/80 rounded px-2 py-1 text-[10px] text-muted pointer-events-none flex items-center gap-1.5">
-          <span className="animate-pulse text-accent">🖐</span>
-          <span>Click &amp; drag <strong>any bubble</strong> to move · Scroll wheel to zoom · Drag background to pan</span>
+        {/* Floating Hint */}
+        <div className="absolute top-2 left-2 bg-black/70 backdrop-blur border border-border/80 rounded px-2.5 py-1 text-[10px] text-muted pointer-events-none flex items-center gap-1.5">
+          <span className="text-accent animate-pulse">🖐</span>
+          <span>Click &amp; drag <strong>any bubble</strong> to move · Scroll wheel to zoom · Drag canvas to pan</span>
         </div>
 
-        {/* ── Holographic Floating Quant HUD (Shows when node hovered or selected) ── */}
+        {/* ── Holographic Floating Quant HUD ── */}
         {(hoveredNode || selectedNode) && (
           <div className="absolute bottom-3 right-3 w-64 rounded-lg border border-accent/40 bg-surface/95 p-3 backdrop-blur-md shadow-2xl space-y-2 animate-scale-up font-mono pointer-events-auto">
             {(() => {
@@ -603,7 +653,7 @@ function MoveableSmartMoneyMap({
                 <>
                   <div className="flex items-center justify-between border-b border-border/80 pb-1.5">
                     <div className="flex items-center gap-1.5">
-                      <div className={`h-2.5 w-2.5 rounded-full ${node.bullish ? "bg-success" : "bg-danger"}`} />
+                      <div className={`h-2.5 w-2.5 rounded-full ${node.bullish ? "bg-emerald-400" : "bg-rose-400"}`} />
                       <span className="text-xs font-bold text-foreground tracking-wider">{node.symbol}</span>
                     </div>
                     <span className={`text-[10px] font-bold ${node.priceChange24h >= 0 ? "text-success" : "text-danger"}`}>
@@ -619,25 +669,24 @@ function MoveableSmartMoneyMap({
 
                     <div className="flex items-center justify-between">
                       <span className="text-muted">Top Trader Longs:</span>
-                      <span className="font-bold text-success">{node.longPct.toFixed(1)}%</span>
+                      <span className="font-bold text-emerald-400">{node.longPct.toFixed(1)}%</span>
                     </div>
-                    {/* Dual progress bar */}
                     <div className="h-1.5 w-full rounded-full bg-surface-raised overflow-hidden flex">
-                      <div className="h-full bg-success" style={{ width: `${node.longPct}%` }} />
-                      <div className="h-full bg-danger flex-1" />
+                      <div className="h-full bg-emerald-500" style={{ width: `${node.longPct}%` }} />
+                      <div className="h-full bg-rose-500 flex-1" />
                     </div>
 
                     <div className="flex items-center justify-between">
                       <span className="text-muted">Taker Flow Ratio:</span>
-                      <span className={`font-bold ${node.takerRatio >= 1.0 ? "text-success" : "text-danger"}`}>
-                        {node.takerRatio.toFixed(2)}x {node.takerRatio >= 1.0 ? "BUY" : "SELL"}
+                      <span className={`font-bold ${node.takerRatio >= 1.0 ? "text-emerald-400" : "text-rose-400"}`}>
+                        {node.takerRatio.toFixed(2)}x {node.takerRatio >= 1.0 ? "BUY AGGRESSION" : "SELLING"}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between pt-1 border-t border-border/60">
                       <span className="text-muted">Regime:</span>
                       <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${
-                        node.bullish ? "bg-success/20 text-success" : "bg-danger/20 text-danger"
+                        node.bullish ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
                       }`}>
                         {node.regime}
                       </span>
@@ -694,8 +743,8 @@ export function SmartMoney() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <span className="font-mono text-xs text-muted animate-pulse">
+      <div className="flex items-center justify-center py-24 font-mono">
+        <span className="text-xs text-muted animate-pulse">
           Synthesizing smart money positioning across top Binance contracts...
         </span>
       </div>
@@ -775,13 +824,11 @@ export function SmartMoney() {
           <span className="text-[10px] text-faint">Updated {lastUpdate}</span>
         </div>
 
-        {/* Moveable Map with Collision Dispersion & Zoom/Pan */}
         <MoveableSmartMoneyMap assets={assets} onSelectCoin={(sym) => setSelectedCoin(sym)} />
       </div>
 
       {/* ── Institutional Conviction Leaderboard ── */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Top Conviction Rank */}
         <div className="rounded-lg border border-border bg-surface p-4 flex flex-col">
           <div className="mb-2 flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-wider text-foreground">
@@ -828,7 +875,6 @@ export function SmartMoney() {
           </div>
         </div>
 
-        {/* Quick Insights Matrix */}
         <div className="rounded-lg border border-border bg-surface p-4 flex flex-col justify-between space-y-4">
           <div>
             <div className="flex items-center justify-between border-b border-border pb-2">
