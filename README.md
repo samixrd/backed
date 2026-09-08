@@ -2,7 +2,7 @@
   <img src="https://backed-zeta.vercel.app/logo.png" width="120" height="120" alt="BACKED Logo" style="border-radius: 50%;" />
   <h1>BACKED — 24/7 Agentic Quant Alpha Scanner on Binance Agent OS</h1>
   <p><strong>Institutional-grade quantitative intelligence, 5 algorithmic alpha models, and non-custodial trade workflows — powered natively by Binance Agent OS.</strong></p>
-  <p>Built for the <strong>Binance Agent OS Hackathon</strong> (Track A: AI Agents &amp; Track B: Data, Analysis &amp; Trading Workflows)</p>
+  <p>Built for the <strong>Binance Agent OS Hackathon</strong> (Track A: AI Agents)</p>
 </div>
 
 ---
@@ -23,7 +23,7 @@ Most autonomous agents and retail traders either guess based on lagged indicator
 
 **BACKED solves this as an Autonomous Quant Alpha & Strategy Agent running natively on Binance Agent OS**:
 
-1. **100% Non-Custodial Agent-to-Agent (A2A) Architecture:** BACKED operates as the **Intelligence & Strategy Agent**. It does **NOT** touch or hold user funds. External **Execution Agents** (Claude Code, Cursor, Codex, Grok, Hermes, Python CCXT bots) connect to BACKED over the Model Context Protocol (MCP) to receive actionable trade setups and execute orders directly on their own exchange accounts.
+1. **100% Non-Custodial Agent-to-Agent (A2A) Architecture:** BACKED operates as the **Intelligence & Strategy Agent**. It does **NOT** touch or hold user funds. External **Execution Agents** (Claude Code, Claude.ai, Hermes) connect to BACKED over the Model Context Protocol (MCP) to receive actionable trade setups and execute orders directly on their own exchange accounts.
 2. **Whole-Market 718-Contract Surveillance:** Ingests live Binance Futures Open Interest (USD), Top Trader Long/Short account ratios, and Taker Buy/Sell volume flow across all 718 USDT perpetual contracts 24/7.
 3. **Hardcore Quantitative Decision Models:**
    - **VPIN (Volume-Synchronized Probability of Toxicity):** Measures informed institutional aggression picking off passive orderbook depth.
@@ -51,7 +51,6 @@ Most autonomous agents and retail traders either guess based on lagged indicator
 ```
 
 - **Track A (AI Agents):** BACKED fulfills all 4 defining characteristics of an autonomous agent: continuous perception across 718 markets, cognitive quantitative reasoning, an autonomous 24/7 cron loop (`/api/run`), and standardized agent-to-agent communication (MCP).
-- **Track B (Data, Analysis & Trading Workflows):** Integrates live Binance Futures derivatives, computes advanced microstructure metrics (VPIN, Margin Beta), and generates non-custodial executable Python CCXT orders for instant trading.
 
 ---
 
@@ -121,7 +120,7 @@ Most autonomous agents and retail traders either guess based on lagged indicator
 | Route | Status | Purpose |
 |---|---|---|
 | `/api/alpha/signals` | **Live** | Core quant alpha engine — scans top 40 contracts, computes all 5 quant models, returns signals with blueprints |
-| `/api/mcp` | **Live** | Universal JSON-RPC 2.0 MCP server — 8 tools for external agents (Claude Code, Cursor, Grok, Codex, Hermes) with visual charts |
+| `/api/mcp` | **Live** | Universal JSON-RPC 2.0 MCP server — 8 tools for external agents (Claude Code, Claude.ai, Hermes) with visual charts |
 | `/api/market/overview` | **Live** | Aggregate macro futures stats — total volume, OI, liquidations |
 | `/api/screener` | **Live** | 718-contract live screener with derivatives metrics per symbol |
 | `/api/intel` | **Live** | Deep single-symbol derivatives intelligence + corroborated spot price |
