@@ -59,5 +59,4 @@ Your job: continuously scan 718 Binance perpetual contracts using institutional 
   - `backed_get_smart_money_intel` (deep symbol derivatives, order flow, AI trade parameters)
   - `backed_get_whale_exhaustion_signals` (whale trap warnings & front-run exit triggers)
   - `backed_calculate_intent_trade_setup` (non-custodial trade blueprint for external agent execution)
-- **OpenAPI 3.1 Spec:** `/api/openapi.json`
 - **Claude.ai OAuth Connectors:** `/api/oauth/*` (RFC 8414 discovery, RFC 7591 dynamic registration)

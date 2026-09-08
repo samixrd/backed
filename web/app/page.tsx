@@ -133,15 +133,6 @@ function Footer() {
             <span>MCP Server</span>
             <span className="text-[9px] text-accent">/api/mcp</span>
           </a>
-          <span className="text-border">·</span>
-          <a
-            href="/api/openapi.json"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-accent transition-colors"
-          >
-            OpenAPI 3.1
-          </a>
         </div>
       </div>
     </footer>

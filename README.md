@@ -12,7 +12,6 @@
 - **Web Terminal (Live):** [https://backed-zeta.vercel.app](https://backed-zeta.vercel.app)
 - **Quant Alpha Signals API:** `https://backed-zeta.vercel.app/api/alpha/signals`
 - **Universal MCP Server (JSON-RPC 2.0):** `https://backed-zeta.vercel.app/api/mcp`
-- **OpenAPI 3.1 Spec (OpenAI Codex / Custom GPTs):** `https://backed-zeta.vercel.app/api/openapi.json`
 - **GitHub Repository:** [https://github.com/samixrd/backed](https://github.com/samixrd/backed)
 
 ---
@@ -125,7 +124,6 @@ Most autonomous agents and retail traders either guess based on lagged indicator
 | `/api/screener` | **Live** | 718-contract live screener with derivatives metrics per symbol |
 | `/api/intel` | **Live** | Deep single-symbol derivatives intelligence + corroborated spot price (LLM synthesis when `AZURE_OPENAI_*` set) |
 | `/api/oauth/*` | **Live** | OAuth 2.1 discovery + dynamic client registration for Claude.ai web connectors |
-| `/api/openapi.json` | **Live** | OpenAPI 3.1 spec for Codex / Custom GPTs |
 
 ---
 
@@ -220,7 +218,6 @@ BACKED/
 │   │   └── api/
 │   │       ├── alpha/signals# Institutional Quant Alpha API (VPIN, Beta, Quadrants)
 │   │       ├── mcp/         # Official MCP Server (JSON-RPC 2.0)
-│   │       ├── openapi.json/# OpenAPI 3.1 Spec for Codex / GPTs
 │   │       ├── oauth/       # OAuth 2.1 flow for Claude.ai web connectors
 │   │       ├── market/      # Whole-market overview & aggregate futures telemetry
 │   │       ├── screener/    # 718 perpetual contracts live screener
