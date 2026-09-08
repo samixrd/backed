@@ -1,29 +1,14 @@
 {
   "name": "backed",
   "version": "0.1.0",
-  "description": "Provable Alpha — autonomous AI fund agent with a crypto-verified, tamper-evident performance record (Binance Agent OS, Track A)",
+  "description": "BACKED — autonomous quant alpha scanner on Binance Agent OS. 718 Binance perpetuals scored by VPIN, margin-beta and 4-quadrant models; non-custodial trade blueprints delivered to any agent over MCP.",
   "type": "module",
   "license": "MIT",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "pretest": "tsc -p tsconfig.json",
-    "test": "node --test \"dist/test/**/*.js\"",
-    "test:watch": "node --test --watch --test-reporter spec \"dist/test/**/*.js\"",
-    "fund:dryrun": "node dist/src/cli.js --dry-run",
-    "fund:live": "node dist/src/cli.js --live",
-    "verify": "node dist/src/verify.js",
-    "db:schema": "supabase db push"
-  },
-  "devDependencies": {
-    "@types/node": "^26.4.1",
-    "typescript": "^7.0.2"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.114.0",
-    "dotenv": "^17.4.2",
-    "ethers": "^6.17.0"
+    "dev": "cd web && npm run dev",
+    "build": "cd web && npm run build"
   }
 }

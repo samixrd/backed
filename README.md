@@ -50,7 +50,7 @@ Most autonomous agents and retail traders either guess based on lagged indicator
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Track A (AI Agents):** BACKED fulfills all 4 defining characteristics of an autonomous agent: continuous perception across 718 markets, cognitive quantitative reasoning, an autonomous 24/7 cron loop (`/api/run`), and standardized agent-to-agent communication (MCP).
+- **Track A (AI Agents):** BACKED fulfills all 4 defining characteristics of an autonomous agent: continuous perception across 718 markets, cognitive quantitative reasoning, an autonomous 24/7 loop (Vercel Cron + edge keep-alive on public data), and standardized agent-to-agent communication (MCP).
 
 ---
 
@@ -102,7 +102,7 @@ Most autonomous agents and retail traders either guess based on lagged indicator
 │  ├─ 60s In-Memory Cache TTL → prevents redundant Binance calls         │
 │  ├─ Cache-Control: s-maxage=60, stale-while-revalidate=120             │
 │  ├─ Binance limit: 2,400 req/min → BACKED uses < 120/min (5%)         │
-│  └─ 24/7 Cron via /api/run → Vercel Cron + Uptime keep-alive          │
+│  └─ Public REST market data → zero API keys, keyless by design        │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -123,12 +123,9 @@ Most autonomous agents and retail traders either guess based on lagged indicator
 | `/api/mcp` | **Live** | Universal JSON-RPC 2.0 MCP server — 8 tools for external agents (Claude Code, Claude.ai, Hermes) with visual charts |
 | `/api/market/overview` | **Live** | Aggregate macro futures stats — total volume, OI, liquidations |
 | `/api/screener` | **Live** | 718-contract live screener with derivatives metrics per symbol |
-| `/api/intel` | **Live** | Deep single-symbol derivatives intelligence + corroborated spot price |
-| `/api/copilot` | **Live** | Universal intent engine — parses natural language queries into structured alpha responses |
-| `/api/run` | **Live** | 24/7 autonomous pipeline cron runner |
+| `/api/intel` | **Live** | Deep single-symbol derivatives intelligence + corroborated spot price (LLM synthesis when `AZURE_OPENAI_*` set) |
+| `/api/oauth/*` | **Live** | OAuth 2.1 discovery + dynamic client registration for Claude.ai web connectors |
 | `/api/openapi.json` | **Live** | OpenAPI 3.1 spec for Codex / Custom GPTs |
-| `/api/trade/execute` | Scaffolded | Non-custodial execution blueprint route (external agents call their own exchange) |
-| `/api/trade/close` | Scaffolded | Non-custodial close blueprint route |
 
 ---
 
@@ -198,19 +195,15 @@ When agents query BACKED tools, MCP automatically delivers:
 ```bash
 # 1. Clone Repository
 git clone https://github.com/samixrd/backed.git
-cd backed
+cd backed/web
 
-# 2. Run unit tests (25/25 passing)
-npm test
-
-# 3. Test autonomous fund pipeline dry-run
-npm run fund:dryrun
-
-# 4. Launch Next.js Web Terminal
-cd web
+# 2. Install & run (market data is keyless — works immediately)
 npm install
 npm run dev
-# Open http://localhost:3000
+# Open http://localhost:3000 — 4 live tabs, real Binance Futures data, no keys needed
+
+# 3. (Optional) LLM synthesis on /api/intel
+cp ../.env.example .env.local   # fill AZURE_OPENAI_ENDPOINT + AZURE_OPENAI_API_KEY
 ```
 
 ---
@@ -220,38 +213,26 @@ npm run dev
 ```
 BACKED/
 ├── src/
-│   ├── market-intel.ts      # Live Binance Futures derivatives, OI, & Taker flow
-│   ├── reasoning.ts         # Azure GPT-4o-mini structured intelligence engine
-│   ├── pipeline.ts          # Autonomous fund loop (ingest -> reason -> anchor -> persist)
-│   ├── anchor.ts            # BSC Testnet onchain commit proof
-│   ├── verifier.ts          # Independent cryptographic audit agent
-│   ├── datasource.ts        # Multi-source price corroboration (Binance + Coinbase)
-│   ├── canonical.ts         # Deterministic serialization (Trust Root)
-│   ├── provable.ts          # SHA-256 hash-chaining and proof math
-│   ├── mcp-client.ts        # Binance Agentic MCP client (OAuth + JSON-RPC)
-│   └── store.ts             # Supabase (`backed` schema) + LocalStore
-├── web/                     # Next.js Institutional Dark Terminal (Deployed on Vercel)
+│   └── mcp-client.ts        # Binance Agentic MCP client (OAuth + JSON-RPC)
+├── web/                     # Next.js Quant Terminal (Deployed on Vercel)
 │   ├── app/
 │   │   ├── page.tsx         # Main Dashboard Layout with 4 institutional tabs
 │   │   └── api/
 │   │       ├── alpha/signals# Institutional Quant Alpha API (VPIN, Beta, Quadrants)
 │   │       ├── mcp/         # Official MCP Server (JSON-RPC 2.0)
 │   │       ├── openapi.json/# OpenAPI 3.1 Spec for Codex / GPTs
+│   │       ├── oauth/       # OAuth 2.1 flow for Claude.ai web connectors
 │   │       ├── market/      # Whole-market overview & aggregate futures telemetry
 │   │       ├── screener/    # 718 perpetual contracts live screener
-│   │       ├── copilot/     # Universal Intent Copilot API
-│   │       └── run/         # End-to-end 24/7 pipeline cron runner
+│   │       └── intel/       # Deep single-symbol derivatives intelligence
 │   └── components/
 │       ├── hero.tsx                 # Binance Agent OS Spotlight Hero
 │       ├── quant-alpha-section.tsx  # Quant Alpha Radar, Inspector & Blueprints
 │       ├── market-overview.tsx      # Macro futures volume, open interest & breadth
 │       ├── token-screener.tsx       # 718-contract search & multi-metric filter table
 │       ├── smart-money.tsx          # 50-coin institutional positioning scatter plot
-│       ├── connect-modal.tsx        # Binance Agent OS Session Manager
-│       └── mcp-integrate-modal.tsx  # Claude/Cursor/Grok/Hermes integration modal
-├── test/                    # 25 automated unit tests
+│       └── mcp-integrate-modal.tsx  # Claude Code / Claude.ai / Hermes integration modal
 ├── AGENTS.md                # Binance Agent OS runtime instructions & core principles
 ├── DATA_SOURCES.md          # Real-time market endpoints specification
-├── PROVABLE_ALPHA_SPEC.md   # Cryptographic architecture specification
-└── REBUILD_PLAN.md          # Migration & architecture milestone history
+└── agentos-run.sh           # Codex CLI loop against Binance agentic MCP
 ```

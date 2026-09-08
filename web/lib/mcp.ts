@@ -6,7 +6,7 @@
  * Access token is cached in-memory (and from env MCP_ACCESS_TOKEN) to survive re-renders.
  */
 
-import { McpClient } from "@core/mcp-client";
+import { McpClient } from "./mcp-client";
 
 // Binance Agentic OAuth only accepts whitelisted client_ids (custom ones are rejected with
 // "AI Agent you are using is not currently supported"). `codex` is a Binance-registered id.

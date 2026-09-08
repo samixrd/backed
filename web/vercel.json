@@ -2,7 +2,7 @@
   "regions": ["sin1"],
   "crons": [
     {
-      "path": "/api/run",
+      "path": "/api/alpha/signals",
       "schedule": "0 0 * * *"
     }
   ]
