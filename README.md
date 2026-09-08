@@ -24,7 +24,7 @@ Every AI claims high accuracy, but everyday traders are overwhelmed by complex d
 2. **Universal Intent Trading Engine:** Formulate natural-language trading goals (*"open 5 usdt trade what most smart money doing on SOL"*). The agent automatically classifies intent (`OPEN_TRADE`, `CLOSE_TRADE`, `INQUIRY`), queries live Binance derivatives, determines direction, fills the order, and outputs a cryptographic receipt.
 3. **Whale Trap Shield (Smart Exit):** Front-runs retail panic by monitoring microstructure exhaustion at key resistance levels. Automatically closes active positions at live market price, secures positive realized PnL, and preserves capital.
 4. **Provable Alpha (BSC Testnet Anchor):** Every trade decision and settlement is hashed (`SHA256`) and anchored onto the **BNB Smart Chain (BSC Testnet)** before execution. Immutable block timestamps provide tamper-evident mathematical proof against backdating, while preserving strategy IP.
-5. **Universal Agent OS Native (MCP Provider):** Any external coding or reasoning agent (Claude Code, Cursor IDE, OpenAI Codex, Groq/Hermes) can connect to BACKED via the **Model Context Protocol (MCP)** with a single command.
+5. **Universal Agent OS Native (MCP Provider):** Any external coding or reasoning agent (Claude Code, Cursor IDE, OpenAI Codex, Grok (xAI), Hermes 3) can connect to BACKED via the **Model Context Protocol (MCP)** with a single command.
 
 ---
 

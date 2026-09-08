@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +13,7 @@ export async function GET(req: Request) {
       title: "BACKED - Binance Agent OS Market Intel & Trade API",
       version: "1.0.0",
       description:
-        "Institutional Smart Money Intel, Autonomous Trading Intent Execution, and BSC Testnet Settlement Proofs for Codex, Claude, Groq & Hermes.",
+        "Institutional Smart Money Intel, Autonomous Trading Intent Execution, and BSC Testnet Settlement Proofs for Codex, Claude, Grok (xAI) & Hermes.",
     },
     servers: [{ url: baseUrl }],
     paths: {

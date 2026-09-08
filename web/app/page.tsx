@@ -123,7 +123,7 @@ function Header({
           <button
             onClick={onOpenMcp}
             className="rounded border border-border bg-surface-raised px-3 py-1 font-mono text-xs text-muted hover:border-accent hover:text-accent transition-colors flex items-center gap-1.5"
-            title="Connect Claude Code, Codex, Groq or Hermes via MCP"
+            title="Connect Claude Code, Cursor, Grok (xAI) or Hermes via MCP"
           >
             <span>🔌 External Agents (MCP)</span>
           </button>

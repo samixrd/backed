@@ -118,7 +118,7 @@ D:\BACKED\
 - [x] Implemented full handshake support: `initialize`, `notifications/initialized`, `ping`, `tools/list`, and `tools/call`.
 - [x] Exposed 3 tools: `backed_get_smart_money_intel`, `backed_execute_intent_trade`, and `backed_smart_exit_whale_shield`.
 - [x] Generated dynamic OpenAPI 3.1 schema at `/api/openapi.json` for OpenAI Codex and Custom GPT Actions.
-- [x] Added 4-tab 1-click integration modal in the web frontend for Claude Code, Cursor, Codex, and Groq/Hermes.
+- [x] Added 6-tab 1-click integration modal in the web frontend for Claude Code, Cursor, Grok (xAI), Hermes 3, Codex, and Python MCP Client.
 
 ### Phase 7: Production Cloud Deployment & 24/7 Engine — [COMPLETED & LIVE]
 - [x] Packaged Next.js web application with self-contained core architecture.
