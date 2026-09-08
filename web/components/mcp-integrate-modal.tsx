@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 
@@ -66,24 +66,28 @@ response = client.chat.completions.create(
 )
 print(response.choices[0].message.content)`;
 
-  // Clean Hermes 3 Python Snippet
-  const hermesPython = `# === Nous Hermes 3 via OpenRouter / Ollama ===
-from openai import OpenAI
+  // Hermes persistent config.yaml snippet
+  const hermesYaml = `mcp_servers:
+  backed:
+    url: "${PROD_URL}/api/mcp"
+    timeout: 60
+    # Tools auto-discovered: mcp__backed__backed_get_smart_money_intel
+    #                        mcp__backed__backed_execute_intent_trade
+    #                        mcp__backed__backed_smart_exit_whale_shield`;
 
-# Connect to Hermes 3 (OpenRouter or local Ollama: http://localhost:11434/v1)
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key="your-openrouter-key",
-)
-
-response = client.chat.completions.create(
-    model="nousresearch/hermes-3-llama-3.1-405b",
-    messages=[
-        {"role": "system", "content": "You are a Binance Agent OS quant. Use BACKED tools to verify whale flow before opening trades."},
-        {"role": "user", "content": "Check smart money on SOLUSDT at ${PROD_URL}/api/intel?symbol=SOLUSDT and decide trade."}
-    ]
-)
-print(response.choices[0].message.content)`;
+  // Hermes Desktop App JSON import (same MCP server format, JSON flavour)
+  const hermesDesktopJson = JSON.stringify(
+    {
+      mcpServers: {
+        backed: {
+          url: `${PROD_URL}/api/mcp`,
+          timeout: 60,
+        },
+      },
+    },
+    null,
+    2
+  );
 
   // Universal Python MCP Client Snippet
   const pythonMcp = `# === Universal Python MCP Client (LangChain / CrewAI / AutoGen) ===
@@ -239,46 +243,61 @@ asyncio.run(main())`;
           {/* Tab 4: Nous Hermes 3 */}
           {activeTab === "hermes" && (
             <div className="space-y-4">
+
+              {/* Section 1: Hermes Desktop App */}
               <div className="rounded-lg border border-accent/20 bg-accent/5 p-3 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-accent uppercase tracking-wide">
-                    Option A: Use Hermes 3 inside Cursor / Windsurf / Continue (Zero Code)
+                    🖥 Hermes Desktop App — Drag &amp; Drop Import
                   </span>
                   <span className="rounded bg-accent/20 px-1.5 py-0.5 text-[9px] font-bold text-accent">
                     Recommended
                   </span>
                 </div>
                 <p className="text-[11px] text-muted leading-relaxed">
-                  Hermes 3 natively supports MCP! Simply add the standard BACKED MCP configuration to your <code>mcp.json</code> and select <strong>nousresearch/hermes-3-llama-3.1-405b</strong> as your model in Cursor or Continue.dev. Hermes will auto-call BACKED tools without writing any custom code.
+                  Open <strong>Hermes Desktop</strong> → Settings → MCP Servers → <em>Import JSON</em>. Paste the config below — BACKED will appear as a persistent server. Tools are auto-discovered with no model flag required.
                 </p>
                 <div className="relative rounded border border-border bg-background p-2.5">
-                  <pre className="text-[11px] text-accent overflow-x-auto select-all">{cursorJson}</pre>
+                  <pre className="text-[11px] text-accent overflow-x-auto select-all">{hermesDesktopJson}</pre>
                   <button
-                    onClick={() => handleCopy(cursorJson, "hermes_json")}
+                    onClick={() => handleCopy(hermesDesktopJson, "hermes_desktop")}
                     className="absolute top-2 right-2 rounded border border-accent/30 bg-accent/10 px-2 py-0.5 text-[9px] font-bold text-accent hover:bg-accent hover:text-on-accent transition-colors"
                   >
-                    {copied === "hermes_json" ? "Copied ✓" : "Copy Config"}
+                    {copied === "hermes_desktop" ? "Copied ✓" : "Copy JSON"}
                   </button>
                 </div>
+                <p className="text-[10px] text-faint">
+                  After import, Hermes Desktop shows 3 BACKED tools in the MCP panel — connection is permanent across sessions.
+                </p>
               </div>
 
+              {/* Section 2: Hermes CLI persistent config */}
               <div className="rounded-lg border border-border bg-surface-raised p-3 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-foreground uppercase tracking-wide">
-                    Option B: Hermes 3 Python / Ollama / OpenRouter
+                    ⌨ Hermes CLI — Persistent Config (One-time Setup)
                   </span>
-                  <span className="text-[9px] text-muted">Direct API</span>
+                  <span className="text-[9px] text-muted">~/.hermes/config.yaml</span>
                 </div>
-                <div className="relative rounded border border-border bg-background p-2.5 max-h-[160px] overflow-y-auto">
-                  <pre className="text-[10px] text-muted overflow-x-auto select-all">{hermesPython}</pre>
+                <p className="text-[11px] text-muted leading-relaxed">
+                  Add this block to <code>~/.hermes/config.yaml</code> once — Hermes CLI will permanently connect to BACKED without specifying a model or server URL on every run.
+                </p>
+                <div className="relative rounded border border-border bg-background p-2.5">
+                  <pre className="text-[11px] text-accent overflow-x-auto select-all">{hermesYaml}</pre>
                   <button
-                    onClick={() => handleCopy(hermesPython, "hermes_py")}
-                    className="sticky top-0 float-right rounded border border-accent/30 bg-accent/10 px-2 py-0.5 text-[9px] font-bold text-accent hover:bg-accent hover:text-on-accent transition-colors"
+                    onClick={() => handleCopy(hermesYaml, "hermes_yaml")}
+                    className="absolute top-2 right-2 rounded border border-accent/30 bg-accent/10 px-2 py-0.5 text-[9px] font-bold text-accent hover:bg-accent hover:text-on-accent transition-colors"
                   >
-                    {copied === "hermes_py" ? "Copied ✓" : "Copy Code"}
+                    {copied === "hermes_yaml" ? "Copied ✓" : "Copy YAML"}
                   </button>
                 </div>
+                <div className="space-y-1 text-[10px] text-muted">
+                  <p>› <code className="text-accent">hermes config edit</code> — open config in your editor</p>
+                  <p>› <code className="text-accent">hermes mcp test backed</code> — verify connection</p>
+                  <p>› In any chat session type <code className="text-accent">/reload-mcp</code> to hot-reload without restart</p>
+                </div>
               </div>
+
             </div>
           )}
 
