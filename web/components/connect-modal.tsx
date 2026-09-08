@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 
@@ -137,10 +137,16 @@ export function ConnectModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="w-full max-w-lg rounded-xl border border-border bg-surface shadow-2xl overflow-hidden animate-scale-up">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-6 animate-fade-in"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-lg max-h-[90vh] flex flex-col rounded-xl border border-border bg-surface shadow-2xl overflow-hidden animate-scale-up"
+      >
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-border px-6 py-4 bg-surface-raised">
+        <div className="shrink-0 flex items-center justify-between border-b border-border px-6 py-4 bg-surface-raised">
           <div className="flex items-center gap-2.5">
             <span className="flex h-3 w-3 relative">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${session.connected ? "bg-success" : "bg-accent"} opacity-75`} />
@@ -159,7 +165,7 @@ export function ConnectModal({
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 space-y-5">
+        <div className="flex-1 overflow-y-auto p-6 space-y-5">
           {session.connected ? (
             /* Active Connected Session View */
             <div className="space-y-4">
@@ -260,7 +266,7 @@ export function ConnectModal({
                     onClick={handleConnectInstantSandbox}
                     className="w-full rounded border border-accent/40 bg-accent py-2.5 font-mono text-xs font-bold text-on-accent hover:bg-accent-strong transition-colors shadow-lg shadow-accent/10"
                   >
-                    Connect Instant Sandbox Session ⚡
+                    Connect Instant Sandbox Session
                   </button>
                 </div>
               )}

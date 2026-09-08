@@ -254,7 +254,7 @@ export function CopilotTerminal() {
               }}
               className="rounded border border-accent bg-accent/20 px-2.5 py-0.5 font-mono text-[9px] font-bold text-accent hover:bg-accent hover:text-on-accent transition-colors flex items-center gap-1.5 animate-pulse"
             >
-              <span>⚡ Connect Binance Agent OS</span>
+              <span>Connect Binance Agent OS</span>
             </button>
           )}
         </div>
@@ -383,7 +383,7 @@ export function CopilotTerminal() {
               disabled={closing}
               className="rounded border border-accent bg-accent px-4 py-1.5 text-xs font-bold text-on-accent hover:bg-accent-strong transition-colors shadow-md shadow-accent/20 animate-pulse"
             >
-              {closing ? "Front-Running Whales..." : "⚡ Trigger Smart Money Front-Run Exit"}
+              {closing ? "Front-Running Whales..." : "Trigger Smart Money Front-Run Exit"}
             </button>
           </div>
         </div>
