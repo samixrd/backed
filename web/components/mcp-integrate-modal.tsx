@@ -326,7 +326,7 @@ asyncio.run(main())`;
         {/* Scrollable Modal Body */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
           <p className="text-xs text-muted leading-relaxed">
-            BACKED is a 24/7 institutional intelligence oracle for Binance Agent OS. We do not hold funds or execute orders — your external agents ingest our real-time smart money flow across all 718 perpetual contracts and execute intent trades directly in their own runtime.
+            BACKED is an autonomous Quant Alpha &amp; Intelligence Agent running on Binance Agent OS. 100% non-custodial: external agents connect via MCP, inspect visual charts &amp; quantitative trade blueprints, and execute orders directly on their own exchange accounts.
           </p>
 
           {activeTab === "claude_code" && (
@@ -337,9 +337,10 @@ asyncio.run(main())`;
                 desc="Run this single command in your terminal. BACKED is permanently registered in Claude Code across all projects — no config file needed."
                 code={claudeCmd} copyId="claude_cmd" copyLabel="Copy Command"
                 tips={[
-                  { cmd: "claude mcp list", label: "verify backed appears" },
-                  { cmd: '"Show me all coins in Smart Accumulation right now"', label: "say in Claude Code" },
-                  { cmd: '"Get 24/7 market overview and top institutional flow"', label: "say in Claude Code" },
+                  { cmd: "claude mcp list", label: "verify backed appears (8 tools active)" },
+                  { cmd: '"Scan BACKED for high-conviction quant alpha signals and show trading blueprints"', label: "say in Claude Code" },
+                  { cmd: '"Show 24/7 market overview with Long/Short breadth pie chart"', label: "say in Claude Code" },
+                  { cmd: '"Show 50-coin institutional positioning clusters"', label: "say in Claude Code" },
                 ]}
               />
               <Section
@@ -384,8 +385,10 @@ asyncio.run(main())`;
                 desc="If using Grok inside Cursor or any MCP-aware IDE, add BACKED as a persistent MCP server. Grok auto-discovers 24/7 market overview, screener across 718 contracts, and smart money intel."
                 code={grokMcpJson} copyId="grok_mcp" copyLabel="Copy JSON"
                 tips={[
-                  { cmd: "backed_get_market_overview", label: "24/7 global market stats" },
+                  { cmd: "backed_get_quant_alpha_signals", label: "5 quant models + visual charts" },
+                  { cmd: "backed_get_market_overview", label: "24/7 global stats + pie chart" },
                   { cmd: "backed_get_screener_all_contracts", label: "screener across 718 perps" },
+                  { cmd: "backed_get_smart_money_clusters", label: "50-coin scatter clusters" },
                   { cmd: "backed_get_smart_money_intel", label: "deep symbol alpha" },
                   { cmd: "backed_get_whale_exhaustion_signals", label: "whale trap warnings" },
                 ]}

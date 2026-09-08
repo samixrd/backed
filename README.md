@@ -1,8 +1,8 @@
 <div align="center">
   <img src="https://backed-zeta.vercel.app/logo.png" width="120" height="120" alt="BACKED Logo" style="border-radius: 50%;" />
-  <h1>BACKED — 24/7 Autonomous Market Intel & Quant Alpha Oracle</h1>
-  <p><strong>Institutional-grade market intelligence, quantitative alpha models, and provable non-custodial workflows on BNB Smart Chain — powered natively by Binance Agent OS.</strong></p>
-  <p>Built for the <strong>Binance Agent OS Hackathon</strong> (Track A & B: AI Agents + Data & Analysis + Trading Workflows)</p>
+  <h1>BACKED — 24/7 Agentic Quant Alpha Scanner on Binance Agent OS</h1>
+  <p><strong>Institutional-grade quantitative intelligence, 5 algorithmic alpha models, and non-custodial trade workflows — powered natively by Binance Agent OS.</strong></p>
+  <p>Built for the <strong>Binance Agent OS Hackathon</strong> (Track A: AI Agents &amp; Track B: Data, Analysis &amp; Trading Workflows)</p>
 </div>
 
 ---
@@ -19,21 +19,39 @@
 
 ## 1. What is BACKED?
 
-Most retail traders and autonomous agents are overwhelmed by complex derivatives metrics, and nobody can verify if an agent's claimed track record is authentic or backdated.
+Most autonomous agents and retail traders either guess based on lagged indicators or run toy bots that require holding private keys on risky web servers.
 
-**BACKED solves this as a 24/7 Non-Custodial Intelligence & Alpha Provider on Binance Agent OS**:
+**BACKED solves this as an Autonomous Quant Alpha & Strategy Agent running natively on Binance Agent OS**:
 
-1. **100% Non-Custodial Operation:** BACKED does **NOT** buy, sell, or hold user assets. External agents (Claude Code, Cursor, Codex, Grok, Hermes, Python CCXT bots) ingest our institutional signals and execute directly on their own exchange accounts.
-2. **Whole-Market 718-Contract Coverage:** Ingests live Binance Futures Open Interest (USD), Top Trader Long/Short account ratios, and Taker Buy/Sell volume flow across all 718 USDT perpetual contracts.
-3. **Hardcore Quant Mathematical Models:**
-   - **VPIN (Volume-Synchronized Probability of Toxicity):** Detects aggressive institutional capital picking off passive orderbook liquidity.
+1. **100% Non-Custodial Agent-to-Agent (A2A) Architecture:** BACKED operates as the **Intelligence & Strategy Agent**. It does **NOT** touch or hold user funds. External **Execution Agents** (Claude Code, Cursor, Codex, Grok, Hermes, Python CCXT bots) connect to BACKED over the Model Context Protocol (MCP) to receive actionable trade setups and execute orders directly on their own exchange accounts.
+2. **Whole-Market 718-Contract Surveillance:** Ingests live Binance Futures Open Interest (USD), Top Trader Long/Short account ratios, and Taker Buy/Sell volume flow across all 718 USDT perpetual contracts 24/7.
+3. **Hardcore Quantitative Decision Models:**
+   - **VPIN (Volume-Synchronized Probability of Toxicity):** Measures informed institutional aggression picking off passive orderbook depth.
    - **Top Trader Margin Beta ($\beta_{\text{TT}}$ Divergence):** Quantifies whale accumulation vs retail trap positioning.
    - **4-Quadrant Velocity Matrix:** Categorizes market momentum into $Q_1$ Capital Expansion, $Q_2$ Short-Covering Exhaustion, $Q_3$ Institutional Short Breakdown, and $Q_4$ Liquidation Flush Reversal.
-   - **Basis Dislocation & Funding Gamma Squeeze:** Detects negative funding ($< -0.005\%$) and spot-futures basis spreads.
-   - **Statistical Expected Value ($+EV\%$):** Mathematically verifies positive expectation before dispatching blueprints.
-4. **1-Click External Agent Blueprints:** Every signal provides instant executable workflows for Claude Code CLI, Python CCXT, and MCP tool invocations with predefined limit entry zones, hard stop-losses, and multi-tier take-profits.
-5. **Provable Alpha on BSC Testnet:** Every trade thesis is hashed (`SHA256`) and anchored onto the **BNB Smart Chain (BSC Testnet)** before broadcast. Immutable block timestamps provide tamper-evident mathematical proof against backdating without leaking strategy IP.
-6. **Universal Model Context Protocol (MCP):** Any external coding or reasoning agent connects to BACKED via JSON-RPC 2.0 with a single command.
+   - **Basis Dislocation & Funding Gamma Squeeze:** Detects deeply inverted funding ($< -0.005\%$) and spot-futures basis dislocations.
+   - **Statistical Expected Value ($+EV\%$):** Mathematically verifies that every dispatched blueprint has positive expectation before broadcast.
+4. **Actionable Trading Blueprints & 1-Click Execution:** Every signal delivers a complete non-custodial blueprint (entry limit zone, hard stop-loss, take-profit 1 & 2, risk/reward 1:2.4+) plus ready-to-execute Python CCXT and Claude Code commands.
+5. **Visual Intelligence in Agent Chat:** When agents call BACKED via MCP, responses include **Mermaid Pie Charts** and **Unicode ASCII Progress Bar Charts** rendered natively inside Claude Desktop, Cursor, and terminal CLI interfaces.
+6. **Cryptographic Integrity & Anti-Backdating:** Every setup is hashed (`SHA256`) at calculation time, providing verifiable proof of inception timestamp without exposing proprietary quant strategy IP.
+
+---
+
+### For Hackathon Judges: Why BACKED is an Autonomous AI Agent
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                   AI AGENT LIFECYCLE (BINANCE AGENT OS)                │
+│                                                                        │
+│   1. SENSE (Perception)  ──> 24/7 Ingestion of 718 Binance Perps       │
+│   2. REASON (Cognition)  ──> VPIN, Beta, 4-Quadrant Multi-Factor Models│
+│   3. DECIDE (Strategy)   ──> Formulates Thesis & Statistical +EV%      │
+│   4. ACT (Tool Use)      ──> Dispatches Execution Workflows via 8 MCPs │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Track A (AI Agents):** BACKED fulfills all 4 defining characteristics of an autonomous agent: continuous perception across 718 markets, cognitive quantitative reasoning, an autonomous 24/7 cron loop (`/api/run`), and standardized agent-to-agent communication (MCP).
+- **Track B (Data, Analysis & Trading Workflows):** Integrates live Binance Futures derivatives, computes advanced microstructure metrics (VPIN, Margin Beta), and generates non-custodial executable Python CCXT orders for instant trading.
 
 ---
 
