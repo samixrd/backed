@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Hero } from "@/components/hero";
 import { TokenScreener } from "@/components/token-screener";
 import { SmartMoney } from "@/components/smart-money";
 import { MarketOverview } from "@/components/market-overview";
 import { QuantAlphaSection } from "@/components/quant-alpha-section";
-import { ConnectModal, useAgentSession } from "@/components/connect-modal";
 import { McpIntegrateModal } from "@/components/mcp-integrate-modal";
 
 const TABS = [
@@ -20,22 +19,13 @@ type TabId = (typeof TABS)[number]["id"];
 
 export default function Home() {
   const [tab, setTab] = useState<TabId>("overview");
-  const [connectOpen, setConnectOpen] = useState(false);
   const [mcpOpen, setMcpOpen] = useState(false);
-
-  useEffect(() => {
-    const handleOpen = () => setConnectOpen(true);
-    window.addEventListener("backed:open-connect", handleOpen);
-    return () => window.removeEventListener("backed:open-connect", handleOpen);
-  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header
-        onOpenConnect={() => setConnectOpen(true)}
         onOpenMcp={() => setMcpOpen(true)}
       />
-      <ConnectModal isOpen={connectOpen} onClose={() => setConnectOpen(false)} />
       <McpIntegrateModal isOpen={mcpOpen} onClose={() => setMcpOpen(false)} />
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-10 space-y-8">
         <Hero />
@@ -82,14 +72,10 @@ export default function Home() {
 }
 
 function Header({
-  onOpenConnect,
   onOpenMcp,
 }: {
-  onOpenConnect: () => void;
   onOpenMcp: () => void;
 }) {
-  const { session } = useAgentSession();
-
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
@@ -107,10 +93,6 @@ function Header({
           </div>
         </a>
         <div className="flex items-center gap-2.5">
-          <span className="hidden sm:inline-flex rounded border border-border bg-surface px-3 py-1 font-mono text-xs text-muted">
-            Network: <span className="font-medium text-foreground ml-1">BSC Testnet</span>
-          </span>
-
           <button
             onClick={onOpenMcp}
             className="rounded border border-border bg-surface-raised px-3 py-1 font-mono text-xs text-muted hover:border-accent hover:text-accent transition-colors flex items-center gap-1.5"
@@ -118,24 +100,6 @@ function Header({
           >
             <span>External Agents (MCP)</span>
           </button>
-
-          {session.connected ? (
-            <button
-              onClick={onOpenConnect}
-              className="rounded border border-success/40 bg-success/10 px-3 py-1 font-mono text-xs font-semibold text-success hover:bg-success/20 transition-colors flex items-center gap-2"
-              title="Click to view or manage Binance Agent OS Session"
-            >
-              <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
-              <span>Agent OS: Connected</span>
-            </button>
-          ) : (
-            <button
-              onClick={onOpenConnect}
-              className="rounded border border-accent/50 bg-accent/20 px-3.5 py-1 font-mono text-xs font-bold text-accent hover:bg-accent hover:text-on-accent transition-colors flex items-center gap-1.5 shadow-sm shadow-accent/20 animate-pulse"
-            >
-              <span>Connect Binance Agent OS</span>
-            </button>
-          )}
         </div>
       </div>
     </header>
@@ -154,13 +118,9 @@ function Footer() {
               className="h-5 w-5 rounded-full object-cover border border-accent/40"
             />
             <span className="font-mono font-bold tracking-tight text-foreground">BACKED</span>
-            <span className="text-border">·</span>
-            <span className="font-mono text-[11px] text-accent uppercase tracking-wider">
-              Autonomous Quant Alpha & Intel Oracle
-            </span>
           </div>
           <p className="font-mono text-[11px] text-muted max-w-2xl leading-relaxed">
-            BACKED · Autonomous Market Intel Agent powered by Binance Agent OS. All decisions are cryptographically anchored onto BNB Smart Chain (BSC Testnet).
+            Autonomous Market Intel Agent powered by Binance Agent OS. All decisions are cryptographically anchored onto BNB Smart Chain (BSC Testnet).
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] text-faint">
@@ -182,10 +142,6 @@ function Footer() {
           >
             OpenAPI 3.1
           </a>
-          <span className="text-border">·</span>
-          <span className="rounded border border-border bg-surface px-2 py-0.5 text-[10px] text-muted">
-            BSC Testnet (Chain ID: 97)
-          </span>
         </div>
       </div>
     </footer>
