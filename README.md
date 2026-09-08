@@ -253,7 +253,7 @@ BACKED/
 ├── test/                    # 25 automated unit tests
 ├── AGENTS.md                # Binance Agent OS runtime instructions & core principles
 ├── DATA_SOURCES.md          # Real-time market endpoints specification
-├── DEMO_SCRIPT_80S.md       # 78-second hackathon demo script + shot map
+├── DEMO_SCRIPT_90S.md       # 1:30 hackathon demo script + shot map
 ├── PROVABLE_ALPHA_SPEC.md   # Cryptographic architecture specification
 └── REBUILD_PLAN.md          # Migration & architecture milestone history
 ```
