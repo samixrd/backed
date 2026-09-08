@@ -65,7 +65,10 @@ function generateMermaidPie(title: string, data: Record<string, number>): string
   const lines = Object.entries(data)
     .filter(([_, v]) => v > 0)
     .map(([k, v]) => `    "${k}" : ${v}`);
-  return "```mermaid\npie title " + title + "\n" + lines.join("\n") + "\n```";
+  return `\`\`\`mermaid
+pie title ${title}
+${lines.join("\n")}
+\`\`\``;
 }
 
 const SERVER_INFO = {
