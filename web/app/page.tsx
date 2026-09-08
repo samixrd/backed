@@ -125,7 +125,7 @@ function Header({
             className="rounded border border-border bg-surface-raised px-3 py-1 font-mono text-xs text-muted hover:border-accent hover:text-accent transition-colors flex items-center gap-1.5"
             title="Connect Claude Code, Cursor, Grok (xAI) or Hermes via MCP"
           >
-            <span>🔌 External Agents (MCP)</span>
+            <span>External Agents (MCP)</span>
           </button>
 
           {session.connected ? (
@@ -142,7 +142,7 @@ function Header({
               onClick={onOpenConnect}
               className="rounded border border-accent/50 bg-accent/20 px-3.5 py-1 font-mono text-xs font-bold text-accent hover:bg-accent hover:text-on-accent transition-colors flex items-center gap-1.5 shadow-sm shadow-accent/20 animate-pulse"
             >
-              <span>⚡ Connect Binance Agent OS</span>
+              <span>Connect Binance Agent OS</span>
             </button>
           )}
         </div>

@@ -1,6 +1,23 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, useMemo } from "react";
+
+interface GainerItem {
+  rank: number;
+  symbol: string;
+  base: string;
+  price: number;
+  priceChangePct: number;
+}
+
+interface OiChangerItem {
+  rank: number;
+  symbol: string;
+  base: string;
+  oiUsdEstimate: number;
+  oiChangePct: string;
+  isPositive: boolean;
+}
 
 interface OverviewData {
   ok: boolean;
@@ -29,22 +46,8 @@ interface OverviewData {
     gainersCount: number;
     losersCount: number;
   };
-  topGainers: Array<{
-    rank: number;
-    symbol: string;
-    base: string;
-    price: number;
-    priceChangePct: number;
-    quoteVolume: number;
-  }>;
-  oiChangers: Array<{
-    rank: number;
-    symbol: string;
-    base: string;
-    oiUsdEstimate: number;
-    oiChangePct: string;
-    isPositive: boolean;
-  }>;
+  topGainers: Record<string, GainerItem[]> | GainerItem[];
+  oiChangers: Record<string, OiChangerItem[]> | OiChangerItem[];
   longShortList: Array<{
     label: string;
     type: string;
@@ -177,13 +180,26 @@ export function MarketOverview() {
     });
   }, [data, liqTimeframe]);
 
+  // Dynamic real data extraction based on selected timeframe
+  const currentGainers = useMemo(() => {
+    if (!data?.topGainers) return [];
+    if (Array.isArray(data.topGainers)) return data.topGainers;
+    return data.topGainers[gainersTimeframe] || data.topGainers["24h"] || [];
+  }, [data, gainersTimeframe]);
+
+  const currentOiChangers = useMemo(() => {
+    if (!data?.oiChangers) return [];
+    if (Array.isArray(data.oiChangers)) return data.oiChangers;
+    return data.oiChangers[oiTimeframe] || data.oiChangers["24h"] || [];
+  }, [data, oiTimeframe]);
+
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-28 space-y-4">
+      <div className="flex flex-col items-center justify-center py-28 space-y-4 font-mono">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-accent/40 bg-accent/10 animate-pulse">
           <span className="h-4 w-4 rounded-full bg-accent animate-ping" />
         </div>
-        <p className="font-mono text-xs text-muted">
+        <p className="text-xs text-muted">
           Ingesting 700+ Binance Futures contracts, Open Interest &amp; Liquidation Heatmaps...
         </p>
       </div>
@@ -194,7 +210,7 @@ export function MarketOverview() {
 
   return (
     <div className="space-y-6 font-mono text-foreground animate-fade-in">
-      {/* ── TOP STATS TICKER BAR (CoinGlass Header Style) ── */}
+      {/* ── TOP STATS TICKER BAR ── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         <div className="rounded-lg border border-border bg-surface p-3.5 flex flex-col justify-between">
           <div className="flex items-center justify-between text-[11px] text-muted">
@@ -275,14 +291,14 @@ export function MarketOverview() {
         </div>
       </div>
 
-      {/* ── 4-COLUMN MAIN ANALYTICS GRID ── */}
+      {/* ── 4-COLUMN MAIN ANALYTICS GRID (Clean, No Emojis, Pure Names) ── */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {/* Index */}
+        {/* Panel 1: Index */}
         <div className="rounded-lg border border-border bg-surface p-4 flex flex-col justify-between space-y-3">
           <div className="flex items-center justify-between border-b border-border/80 pb-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-accent" />
-              Index
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+              INDEX
             </h4>
             <span className="text-[10px] text-muted">Global Macro</span>
           </div>
@@ -333,11 +349,12 @@ export function MarketOverview() {
           </div>
         </div>
 
-        {/* Top Gainers */}
+        {/* Panel 2: Top Gainers (Clean coin name, no logo box, multi-timeframe real data) */}
         <div className="rounded-lg border border-border bg-surface p-4 flex flex-col justify-between space-y-3">
           <div className="flex items-center justify-between border-b border-border/80 pb-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-              <span className="text-success">▲</span> Top Gainers
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-success" />
+              TOP GAINERS
             </h4>
             <div className="flex items-center gap-1 bg-surface-raised rounded p-0.5 text-[9px]">
               {(["5m", "30m", "4h", "24h"] as const).map((tf) => (
@@ -354,21 +371,18 @@ export function MarketOverview() {
             </div>
           </div>
           <div className="space-y-2.5 text-xs">
-            {data.topGainers.map((g, idx) => (
+            {currentGainers.slice(0, 5).map((g, idx) => (
               <div key={g.symbol} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <span className="text-[10px] text-muted w-3 font-semibold">{idx + 1}</span>
-                  <div className="flex h-5 w-5 items-center justify-center rounded bg-accent/10 border border-accent/20 text-[9px] font-bold text-accent">
-                    {g.base.slice(0, 3)}
-                  </div>
-                  <span className="font-bold text-foreground">{g.base}</span>
+                  <span className="font-bold text-foreground text-xs tracking-wide">{g.base}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-[11px] text-muted">
                     ${g.price < 1 ? g.price.toFixed(4) : g.price.toFixed(2)}
                   </span>
-                  <span className="text-success font-bold text-[11px] w-14 text-right">
-                    +{g.priceChangePct}%
+                  <span className={`font-bold text-[11px] w-16 text-right ${g.priceChangePct >= 0 ? "text-success" : "text-danger"}`}>
+                    {g.priceChangePct >= 0 ? "+" : ""}{g.priceChangePct}%
                   </span>
                 </div>
               </div>
@@ -376,11 +390,12 @@ export function MarketOverview() {
           </div>
         </div>
 
-        {/* OI Change */}
+        {/* Panel 3: OI Change (%) (Clean coin name, no logo box, multi-timeframe real data) */}
         <div className="rounded-lg border border-border bg-surface p-4 flex flex-col justify-between space-y-3">
           <div className="flex items-center justify-between border-b border-border/80 pb-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-              <span className="text-accent">◈</span> OI Change (%)
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+              OI CHANGE (%)
             </h4>
             <div className="flex items-center gap-1 bg-surface-raised rounded p-0.5 text-[9px]">
               {(["5m", "30m", "4h", "24h"] as const).map((tf) => (
@@ -397,14 +412,11 @@ export function MarketOverview() {
             </div>
           </div>
           <div className="space-y-2.5 text-xs">
-            {data.oiChangers.map((oi, idx) => (
+            {currentOiChangers.slice(0, 5).map((oi, idx) => (
               <div key={oi.symbol} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <span className="text-[10px] text-muted w-3 font-semibold">{idx + 1}</span>
-                  <div className="flex h-5 w-5 items-center justify-center rounded bg-surface-raised border border-border text-[9px] font-bold text-foreground">
-                    {oi.base.slice(0, 3)}
-                  </div>
-                  <span className="font-bold text-foreground">{oi.base}</span>
+                  <span className="font-bold text-foreground text-xs tracking-wide">{oi.base}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-[11px] text-muted">
@@ -419,11 +431,12 @@ export function MarketOverview() {
           </div>
         </div>
 
-        {/* Long/Short Ratio */}
+        {/* Panel 4: Long/Short Ratio (Clean, no emoji) */}
         <div className="rounded-lg border border-border bg-surface p-4 flex flex-col justify-between space-y-3">
           <div className="flex items-center justify-between border-b border-border/80 pb-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-              <span className="text-accent">⚖</span> Long / Short Ratio
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+              LONG / SHORT RATIO
             </h4>
             <span className="text-[9px] text-accent font-semibold">Binance Top Traders</span>
           </div>
@@ -446,18 +459,20 @@ export function MarketOverview() {
         </div>
       </div>
 
-      {/* ── SECTION 2: LIQUIDATION HEATMAP (CoinGlass Treemap Replica) ── */}
+      {/* ── SECTION 2: LIQUIDATION HEATMAP (Clean, No Emojis) ── */}
       <div className="rounded-xl border border-border bg-surface p-5 space-y-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/80 pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-7 w-7 items-center justify-center rounded bg-danger/10 border border-danger/30 text-danger text-sm">
-              🔥
+            <div className="flex h-7 w-7 items-center justify-center rounded bg-danger/10 border border-danger/30 text-danger">
+              <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-danger" strokeWidth="2">
+                <path d="M12 2c0 4-4 6-4 10a6 6 0 0012 0c0-4-4-6-4-10z" />
+              </svg>
             </div>
             <div>
               <h3 className="text-sm font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
-                Liquidation Heatmap
+                LIQUIDATION HEATMAP
                 <span className="rounded bg-accent/20 px-2 py-0.5 text-[10px] font-bold text-accent">
-                  Live Binance OS Data
+                  LIVE BINANCE OS DATA
                 </span>
               </h3>
               <p className="text-[10px] text-muted">
@@ -660,7 +675,7 @@ export function MarketOverview() {
             <div>
               <div className="flex items-center justify-between border-b border-border pb-2.5">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">
-                  Total Liquidations
+                  TOTAL LIQUIDATIONS
                 </h4>
                 <div className="flex items-center gap-1">
                   <span className="rounded bg-success/20 px-1.5 py-0.5 text-[9px] font-bold text-success">Long</span>
@@ -698,7 +713,7 @@ export function MarketOverview() {
             {/* Institutional Commentary */}
             <div className="rounded-lg border border-accent/20 bg-accent/5 p-3">
               <span className="text-[10px] font-bold text-accent uppercase tracking-wider block mb-1">
-                Derivatives Liquidation Intel
+                DERIVATIVES LIQUIDATION INTEL
               </span>
               <p className="text-[10px] text-muted leading-relaxed">
                 {data.liquidationsSummary.commentary}
@@ -712,7 +727,7 @@ export function MarketOverview() {
           <div className="flex items-center justify-between text-[11px] border-b border-border/60 pb-1.5">
             <span className="font-bold text-foreground flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-danger animate-ping" />
-              Real-Time Liquidations Stream
+              REAL-TIME LIQUIDATIONS STREAM
             </span>
             <span className="text-[10px] text-faint">Auto-updating from Binance Futures engine</span>
           </div>

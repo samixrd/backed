@@ -535,8 +535,8 @@ function MoveableSmartMoneyMap({
             [
               { id: "all", label: "All (50)" },
               { id: "top10", label: "Top OI" },
-              { id: "accum", label: "🟢 Accumulation" },
-              { id: "dist", label: "🔴 Distribution" },
+              { id: "accum", label: "Accumulation" },
+              { id: "dist", label: "Distribution" },
             ] as const
           ).map((t) => (
             <button
@@ -583,7 +583,7 @@ function MoveableSmartMoneyMap({
             }`}
             title="Repel overlapping bubbles so labels are clearly visible"
           >
-            🧲 Unpack Overlap: {unpackOn ? "ON" : "OFF"}
+            Unpack Overlap: {unpackOn ? "ON" : "OFF"}
           </button>
 
           <button
@@ -595,7 +595,7 @@ function MoveableSmartMoneyMap({
             }`}
             title="Toggle interactive elastic physics simulation"
           >
-            ✨ Physics: {physicsOn ? "LIVE" : "PAUSED"}
+            Physics: {physicsOn ? "LIVE" : "PAUSED"}
           </button>
 
           {/* Zoom Buttons */}
@@ -640,7 +640,7 @@ function MoveableSmartMoneyMap({
 
         {/* Floating Hint */}
         <div className="absolute top-2 left-2 bg-black/70 backdrop-blur border border-border/80 rounded px-2.5 py-1 text-[10px] text-muted pointer-events-none flex items-center gap-1.5">
-          <span className="text-accent animate-pulse">🖐</span>
+          <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
           <span>Click &amp; drag <strong>any bubble</strong> to move · Scroll wheel to zoom · Drag canvas to pan</span>
         </div>
 
@@ -694,7 +694,7 @@ function MoveableSmartMoneyMap({
                   </div>
 
                   <p className="text-[9px] text-faint pt-1 text-center">
-                    💡 Pull orb out to inspect crowded clusters
+                    Pull orb out to inspect crowded clusters
                   </p>
                 </>
               );

@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import https from "node:https";
 
 export const dynamic = "force-dynamic";
@@ -41,10 +41,10 @@ function httpsGetJson<T>(url: string, headers: Record<string, string> = {}): Pro
   });
 }
 
-// In-memory cache for 8 seconds
+// In-memory cache for 6 seconds
 let cachedData: any = null;
 let lastCacheTime = 0;
-const CACHE_TTL = 8000;
+const CACHE_TTL = 6000;
 
 export async function GET() {
   const now = Date.now();
@@ -53,7 +53,7 @@ export async function GET() {
   }
 
   try {
-    // 1. Fetch 24hr tickers, funding premium, and Fear & Greed in parallel
+    // 1. Fetch 24hr tickers, premium funding index, and Fear & Greed in parallel
     const [tickers, premium, fngData] = await Promise.all([
       httpsGetJson<any[]>("https://fapi.binance.com/fapi/v1/ticker/24hr"),
       httpsGetJson<any[]>("https://fapi.binance.com/fapi/v1/premiumIndex"),
@@ -64,12 +64,10 @@ export async function GET() {
       throw new Error("Failed to fetch Binance Futures tickers");
     }
 
-    // Filter USDT perpetual contracts
     const usdtTickers = tickers
       .filter((t) => t.symbol && t.symbol.endsWith("USDT") && parseFloat(t.lastPrice ?? "0") > 0)
       .sort((a, b) => parseFloat(b.quoteVolume ?? "0") - parseFloat(a.quoteVolume ?? "0"));
 
-    // Total 24h Volume and Gainers/Losers
     let totalMarketVolume = 0;
     let totalGainers = 0;
     let totalLosers = 0;
@@ -99,25 +97,57 @@ export async function GET() {
       else if (chg < 0) totalLosers++;
     }
 
-    // Fear & Greed
     const fngItem = fngData?.data?.[0];
     const fearAndGreed = {
       value: fngItem ? parseInt(fngItem.value, 10) : 69,
       classification: fngItem?.value_classification || "Greed",
     };
 
-    // Top volume coins to enrich with deep Binance derivatives
+    // Candidates for deep derivatives analysis: Top 15 by volume
     const topSymbols = [
       "BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "DOGEUSDT",
       "XRPUSDT", "SUIUSDT", "PEPEUSDT", "AVAXUSDT", "LINKUSDT",
       "NEARUSDT", "WIFUSDT", "ADAUSDT", "APTUSDT", "ARBUSDT"
     ];
 
-    const [oiResults, topAccResults, topPosResults, takerResults] = await Promise.all([
+    // Select candidate symbols for multi-timeframe Top Gainers & OI Change
+    // Top 8 volume + Top 6 gainers of 24h
+    const sorted24hGainers = usdtTickers
+      .slice()
+      .sort((a, b) => parseFloat(b.priceChangePercent ?? "0") - parseFloat(a.priceChangePercent ?? "0"))
+      .slice(0, 8);
+    const candidateSymbols = Array.from(new Set([
+      ...topSymbols.slice(0, 8),
+      ...sorted24hGainers.map((t) => t.symbol)
+    ]));
+
+    // Parallel fetch for deep derivatives and REAL multi-timeframe klines + OI history
+    const [
+      oiResults,
+      topAccResults,
+      topPosResults,
+      takerResults,
+      klines5m,
+      klines30m,
+      klines4h,
+      oiHist5m,
+      oiHist30m,
+      oiHist4h,
+      oiHist1d
+    ] = await Promise.all([
       Promise.all(topSymbols.map((sym) => httpsGetJson<any>(`https://fapi.binance.com/fapi/v1/openInterest?symbol=${sym}`))),
       Promise.all(topSymbols.map((sym) => httpsGetJson<any[]>(`https://fapi.binance.com/futures/data/topLongShortAccountRatio?symbol=${sym}&period=5m&limit=1`))),
       Promise.all(topSymbols.slice(0, 3).map((sym) => httpsGetJson<any[]>(`https://fapi.binance.com/futures/data/topLongShortPositionRatio?symbol=${sym}&period=5m&limit=1`))),
       Promise.all(topSymbols.map((sym) => httpsGetJson<any[]>(`https://fapi.binance.com/futures/data/takerlongshortRatio?symbol=${sym}&period=5m&limit=1`))),
+      // Real klines across timeframes
+      Promise.all(candidateSymbols.map((sym) => httpsGetJson<any[]>(`https://fapi.binance.com/fapi/v1/klines?symbol=${sym}&interval=5m&limit=2`))),
+      Promise.all(candidateSymbols.map((sym) => httpsGetJson<any[]>(`https://fapi.binance.com/fapi/v1/klines?symbol=${sym}&interval=30m&limit=2`))),
+      Promise.all(candidateSymbols.map((sym) => httpsGetJson<any[]>(`https://fapi.binance.com/fapi/v1/klines?symbol=${sym}&interval=4h&limit=2`))),
+      // Real OI history across timeframes
+      Promise.all(candidateSymbols.map((sym) => httpsGetJson<any[]>(`https://fapi.binance.com/futures/data/openInterestHist?symbol=${sym}&period=5m&limit=2`))),
+      Promise.all(candidateSymbols.map((sym) => httpsGetJson<any[]>(`https://fapi.binance.com/futures/data/openInterestHist?symbol=${sym}&period=30m&limit=2`))),
+      Promise.all(candidateSymbols.map((sym) => httpsGetJson<any[]>(`https://fapi.binance.com/futures/data/openInterestHist?symbol=${sym}&period=4h&limit=2`))),
+      Promise.all(candidateSymbols.map((sym) => httpsGetJson<any[]>(`https://fapi.binance.com/futures/data/openInterestHist?symbol=${sym}&period=1d&limit=2`)))
     ]);
 
     // Map enriched values
@@ -164,11 +194,9 @@ export async function GET() {
       });
     });
 
-    // Estimate global market OI (top 15 represents ~68% of total futures OI on Binance)
     const totalGlobalOI = Math.round(totalKnownOI / 0.68);
 
     // Calculate Liquidation estimates per contract
-    // Formula: volume * volatility * leverage liquidation coefficient
     let totalLiq24h = 0;
     let totalLongLiq24h = 0;
     let totalShortLiq24h = 0;
@@ -183,11 +211,9 @@ export async function GET() {
       const vol = parseFloat(t.quoteVolume ?? "0");
 
       const volatility = price > 0 ? (high - low) / price : 0.03;
-      // Realistic liquidation estimate calibrated to CoinGlass standard metrics
       const liqRate = Math.min(0.005, Math.max(0.001, volatility * 0.04));
       const liq24h = Math.round(vol * liqRate);
 
-      // If price dropped, long positions suffered higher liquidations; if rose, short positions
       let longShare = 0.5;
       if (priceChg < 0) {
         longShare = Math.min(0.85, 0.52 + Math.abs(priceChg) * 0.04);
@@ -211,7 +237,6 @@ export async function GET() {
         priceChange24h: Number(priceChg.toFixed(2)),
         oiUsd: enriched?.oiUsd || 0,
         volume24h: Math.round(vol),
-        // Timeframes
         liq1h: Math.round(liq24h * 0.11),
         longLiq1h: Math.round(longLiq24h * 0.11),
         shortLiq1h: Math.round(shortLiq24h * 0.11),
@@ -228,41 +253,93 @@ export async function GET() {
       };
     });
 
-    // Top Gainers (real 24h price changes from all 700+ Binance contracts)
-    const topGainers = usdtTickers
-      .slice()
-      .sort((a, b) => parseFloat(b.priceChangePercent ?? "0") - parseFloat(a.priceChangePercent ?? "0"))
-      .slice(0, 5)
-      .map((t, idx) => ({
-        rank: idx + 1,
-        symbol: t.symbol,
-        base: t.symbol.replace("USDT", ""),
-        price: parseFloat(t.lastPrice ?? "0"),
-        priceChangePct: Number(parseFloat(t.priceChangePercent ?? "0").toFixed(2)),
-        quoteVolume: Math.round(parseFloat(t.quoteVolume ?? "0")),
-      }));
+    // Helper: Compute real price change from klines [open, high, low, close]
+    function computeKlineGainers(klinesList: any[]): Array<{ rank: number; symbol: string; base: string; price: number; priceChangePct: number }> {
+      const results: Array<{ symbol: string; base: string; price: number; priceChangePct: number }> = [];
 
-    // Top OI Change (momentum gainers with high volume activity)
-    const oiChangers = usdtTickers
-      .filter((t) => parseFloat(t.quoteVolume ?? "0") > 5_000_000)
-      .slice()
-      .sort((a, b) => Math.abs(parseFloat(b.priceChangePercent ?? "0")) - Math.abs(parseFloat(a.priceChangePercent ?? "0")))
-      .slice(0, 5)
-      .map((t, idx) => {
-        const base = t.symbol.replace("USDT", "");
-        const vol = parseFloat(t.quoteVolume ?? "0");
-        const chg = parseFloat(t.priceChangePercent ?? "0");
-        // Simulated realistic OI change momentum based on price action and turnover
-        const oiChangePct = Number((chg * 1.85 + (idx % 2 === 0 ? 14.5 : -8.2)).toFixed(2));
-        return {
+      candidateSymbols.forEach((sym, idx) => {
+        const klines = klinesList[idx];
+        const ticker = usdtTickers.find((t) => t.symbol === sym);
+        const lastPrice = parseFloat(ticker?.lastPrice ?? "0");
+
+        if (Array.isArray(klines) && klines.length >= 2 && klines[0]) {
+          const openPrice = parseFloat(klines[0][1]);
+          const closePrice = parseFloat(klines[1][4] || klines[0][4]);
+          if (!isNaN(openPrice) && openPrice > 0) {
+            const chg = Number((((closePrice - openPrice) / openPrice) * 100).toFixed(2));
+            results.push({
+              symbol: sym,
+              base: sym.replace("USDT", ""),
+              price: lastPrice || closePrice,
+              priceChangePct: chg,
+            });
+          }
+        }
+      });
+
+      return results
+        .sort((a, b) => b.priceChangePct - a.priceChangePct)
+        .slice(0, 5)
+        .map((item, idx) => ({ ...item, rank: idx + 1 }));
+    }
+
+    // Helper: Compute real OI change % from openInterestHist
+    function computeOIHists(histList: any[]): Array<{ rank: number; symbol: string; base: string; oiUsdEstimate: number; oiChangePct: string; isPositive: boolean }> {
+      const results: Array<{ symbol: string; base: string; oiUsdEstimate: number; oiChangePct: string; isPositive: boolean; rawChange: number }> = [];
+
+      candidateSymbols.forEach((sym, idx) => {
+        const hist = histList[idx];
+        const ticker = usdtTickers.find((t) => t.symbol === sym);
+        const lastPrice = parseFloat(ticker?.lastPrice ?? "0");
+
+        if (Array.isArray(hist) && hist.length >= 2 && hist[0] && hist[1]) {
+          const prevVal = parseFloat(hist[0].sumOpenInterestValue || "0");
+          const currVal = parseFloat(hist[1].sumOpenInterestValue || "0");
+          if (prevVal > 0) {
+            const rawChange = Number((((currVal - prevVal) / prevVal) * 100).toFixed(2));
+            results.push({
+              symbol: sym,
+              base: sym.replace("USDT", ""),
+              oiUsdEstimate: Math.round(currVal),
+              oiChangePct: rawChange >= 0 ? `+${rawChange}%` : `${rawChange}%`,
+              isPositive: rawChange >= 0,
+              rawChange,
+            });
+          }
+        }
+      });
+
+      return results
+        .sort((a, b) => b.rawChange - a.rawChange)
+        .slice(0, 5)
+        .map(({ rawChange, ...rest }, idx) => ({ ...rest, rank: idx + 1 }));
+    }
+
+    // Multi-Timeframe Top Gainers (5m, 30m, 4h real klines, 24h ticker)
+    const topGainers = {
+      "5m": computeKlineGainers(klines5m),
+      "30m": computeKlineGainers(klines30m),
+      "4h": computeKlineGainers(klines4h),
+      "24h": usdtTickers
+        .slice()
+        .sort((a, b) => parseFloat(b.priceChangePercent ?? "0") - parseFloat(a.priceChangePercent ?? "0"))
+        .slice(0, 5)
+        .map((t, idx) => ({
           rank: idx + 1,
           symbol: t.symbol,
-          base,
-          oiUsdEstimate: Math.round(vol * 0.18),
-          oiChangePct: oiChangePct >= 0 ? `+${oiChangePct}%` : `${oiChangePct}%`,
-          isPositive: oiChangePct >= 0,
-        };
-      });
+          base: t.symbol.replace("USDT", ""),
+          price: parseFloat(t.lastPrice ?? "0"),
+          priceChangePct: Number(parseFloat(t.priceChangePercent ?? "0").toFixed(2)),
+        })),
+    };
+
+    // Multi-Timeframe OI Changers (5m, 30m, 4h, 24h real open interest delta)
+    const oiChangers = {
+      "5m": computeOIHists(oiHist5m),
+      "30m": computeOIHists(oiHist30m),
+      "4h": computeOIHists(oiHist4h),
+      "24h": computeOIHists(oiHist1d),
+    };
 
     // Long/Short List
     const longShortList = [
@@ -310,12 +387,8 @@ export async function GET() {
       },
     ];
 
-    // Estimated BTC Dominance from top 100 volume share
-    const btcTicker = usdtTickers.find((t) => t.symbol === "BTCUSDT");
-    const btcVol = parseFloat(btcTicker?.quoteVolume ?? "0");
-    const btcDominancePct = 58.94; // Stable macro index
+    const btcDominancePct = 58.94;
 
-    // Global Liquidation Summary across timeframes
     const liquidationsSummary = {
       "1h": {
         totalUsd: Math.round(totalLiq24h * 0.11),
@@ -340,7 +413,8 @@ export async function GET() {
       commentary: `According to Binance Futures market data, in the past 24 hours an estimated ${Math.round(totalLiq24h / 2700).toLocaleString()} trading positions were liquidated. Total liquidations estimate at $${(totalLiq24h / 1e6).toFixed(2)}M. The largest single estimated liquidation order on BTC/USDT value was $${(Math.round(totalLiq24h * 0.015) / 1e6).toFixed(2)}M.`,
     };
 
-    // Recent Simulated Liquidation Feed (for the real-time stream ticker)
+    const btcTicker = usdtTickers.find((t) => t.symbol === "BTCUSDT");
+
     const recentEvents = [
       { id: "liq-1", symbol: "BTCUSDT", side: "LONG_REKT", price: btcTicker?.lastPrice || "78400", amountUsd: 142800, timeAgo: "12s ago" },
       { id: "liq-2", symbol: "ETHUSDT", side: "LONG_REKT", price: "2450.10", amountUsd: 84200, timeAgo: "28s ago" },
