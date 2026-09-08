@@ -277,10 +277,11 @@ asyncio.run(main())`;
         {/* Sticky Top Header */}
         <div className="shrink-0 flex items-center justify-between border-b border-border px-5 py-3.5 bg-surface-raised">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-3 w-3 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-accent" />
-            </span>
+            <img
+              src="/logo.png"
+              alt="BACKED Logo"
+              className="h-6 w-6 rounded-full object-cover border border-accent/40"
+            />
             <div>
               <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
                 Connect External Agents &amp; Models

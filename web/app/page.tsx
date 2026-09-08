@@ -94,12 +94,11 @@ function Header({
     <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
         <a href="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-7 w-7 items-center justify-center rounded border border-accent/40 bg-accent/10 transition-colors group-hover:border-accent">
-            <svg viewBox="0 0 24 24" className="h-4 w-4 stroke-accent" fill="none" strokeWidth="1.8">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              <circle cx="12" cy="12" r="1.5" fill="#c9a227" stroke="none" />
-            </svg>
-          </div>
+          <img
+            src="/logo.png"
+            alt="BACKED Logo"
+            className="h-7 w-7 rounded-full object-cover border border-accent/50 shadow-sm shadow-accent/20 transition-transform group-hover:scale-105"
+          />
           <div className="flex items-baseline gap-2">
             <span className="font-mono text-base font-bold tracking-tight text-foreground">BACKED</span>
             <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-accent">
@@ -148,7 +147,12 @@ function Footer() {
     <footer className="mt-20 border-t border-border/80 pt-8 pb-12 text-xs">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/logo.png"
+              alt="BACKED Logo"
+              className="h-5 w-5 rounded-full object-cover border border-accent/40"
+            />
             <span className="font-mono font-bold tracking-tight text-foreground">BACKED</span>
             <span className="text-border">·</span>
             <span className="font-mono text-[11px] text-accent uppercase tracking-wider">

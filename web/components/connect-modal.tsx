@@ -148,10 +148,11 @@ export function ConnectModal({
         {/* Modal Header */}
         <div className="shrink-0 flex items-center justify-between border-b border-border px-6 py-4 bg-surface-raised">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-3 w-3 relative">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${session.connected ? "bg-success" : "bg-accent"} opacity-75`} />
-              <span className={`relative inline-flex rounded-full h-3 w-3 ${session.connected ? "bg-success" : "bg-accent"}`} />
-            </span>
+            <img
+              src="/logo.png"
+              alt="BACKED Logo"
+              className="h-5 w-5 rounded-full object-cover border border-accent/40"
+            />
             <span className="font-mono text-sm font-bold uppercase tracking-wider text-foreground">
               Connect Binance Agent OS
             </span>

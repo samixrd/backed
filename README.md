@@ -1,7 +1,9 @@
-# BACKED — 24/7 Autonomous Market Intel & Quant Alpha Oracle
-
-> **Institutional-grade market intelligence, quantitative alpha models, and provable non-custodial workflows on BNB Smart Chain — powered natively by Binance Agent OS.**
-> Built for the **Binance Agent OS Hackathon** (Track A & B: AI Agents + Data & Analysis + Trading Workflows).
+<div align="center">
+  <img src="https://backed-zeta.vercel.app/logo.png" width="120" height="120" alt="BACKED Logo" style="border-radius: 50%;" />
+  <h1>BACKED — 24/7 Autonomous Market Intel & Quant Alpha Oracle</h1>
+  <p><strong>Institutional-grade market intelligence, quantitative alpha models, and provable non-custodial workflows on BNB Smart Chain — powered natively by Binance Agent OS.</strong></p>
+  <p>Built for the <strong>Binance Agent OS Hackathon</strong> (Track A & B: AI Agents + Data & Analysis + Trading Workflows)</p>
+</div>
 
 ---
 

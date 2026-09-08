@@ -14,9 +14,14 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "BACKED",
+  title: "BACKED — 24/7 Autonomous Market Intel & Quant Alpha Oracle",
   description:
-    "Provable Alpha — autonomous AI fund agents with a crypto-verified, tamper-evident performance record. Binance Agent OS, Track A.",
+    "Institutional-grade market intelligence, quantitative alpha models, and provable non-custodial workflows on BNB Smart Chain — powered natively by Binance Agent OS.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
