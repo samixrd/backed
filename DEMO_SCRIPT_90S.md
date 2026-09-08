@@ -45,7 +45,7 @@
 ## BEAT 6 — CLOSE · 1:15–1:30 · Quant tab → Hero
 **"No keys, no custody, no vibes. Live seven-eighteen-market perception, five institutional models, eight MCP tools, one-click agent workflows — so every external agent trades on its own account, on its own risk. That's BACKED — institutional alpha, delivered agent-to-agent, on Binance Agent OS."**
 
-🖱 Alt-Tab back to the Quant tab: point at the MCP tool-call JSON block (the `decisionHash`/setup JSON in the workflow panel) → 1 sec on the "100% Non-Custodial" hero chip → cut.
+🖱 Alt-Tab back to the Quant tab: point at the **MCP tool-call JSON** block in the workflow panel → 1 sec on the "100% Non-Custodial" hero chip → cut.
 
 > **Note:** old "Provable Anchor / BSCScan" badge was REMOVED from the Quant Inspector (didn't match the non-custodial scanner identity). Do NOT show BSCScan tab in this cut.
 
