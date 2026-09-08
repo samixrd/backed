@@ -120,7 +120,7 @@ function Footer() {
             <span className="font-mono font-bold tracking-tight text-foreground">BACKED</span>
           </div>
           <p className="font-mono text-[11px] text-muted max-w-2xl leading-relaxed">
-            Autonomous Market Intel Agent powered by Binance Agent OS. All decisions are cryptographically anchored onto BNB Smart Chain (BSC Testnet).
+            Agentic quant alpha scanner on Binance Agent OS. Scans 718 perpetual contracts and dispatches structured alpha workflows via MCP — external agents execute trades on their own accounts. BACKED does not buy, sell, or hold funds.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] text-faint">
