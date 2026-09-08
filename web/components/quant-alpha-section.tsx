@@ -72,18 +72,20 @@ function getQuadrantBadge(quad: string) {
 export function QuantAlphaSection() {
   const [signals, setSignals] = useState<AlphaSignal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<string>("ALL");
   const [selectedSignal, setSelectedSignal] = useState<AlphaSignal | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [workflowTab, setWorkflowTab] = useState<"claude" | "python" | "mcp">("claude");
 
-  async function loadSignals() {
+  async function loadSignals(isManual = false) {
+    if (isManual) setRefreshing(true);
     try {
       const res = await fetch("/api/alpha/signals");
       const json = await res.json();
       if (json.ok && Array.isArray(json.signals)) {
         setSignals(json.signals);
-        if (json.signals.length > 0 && !selectedSignal) {
+        if (json.signals.length > 0 && (!selectedSignal || isManual)) {
           setSelectedSignal(json.signals[0]);
         }
       }
@@ -91,12 +93,14 @@ export function QuantAlphaSection() {
       console.error("Failed to load alpha signals", err);
     } finally {
       setLoading(false);
+      if (isManual) setRefreshing(false);
     }
   }
 
   useEffect(() => {
     loadSignals();
-    const interval = setInterval(loadSignals, 12000);
+    // 60-second interval: optimal for free-tier rate-limits & serverless cache
+    const interval = setInterval(() => loadSignals(false), 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -138,9 +142,21 @@ export function QuantAlphaSection() {
             <span className="rounded border border-accent/30 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-accent">
               Zero Custody
             </span>
-            <span className="rounded border border-border bg-surface-raised px-2.5 py-1 text-[10px] text-muted">
-              Binance Agent OS Live Feed
-            </span>
+            <button
+              onClick={() => loadSignals(true)}
+              disabled={refreshing}
+              className="rounded border border-border bg-surface-raised px-2.5 py-1 text-[10px] text-muted hover:border-accent hover:text-accent transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              title="Click to manually refresh alpha signals from Binance"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className={`h-3 w-3 stroke-current fill-none ${refreshing ? "animate-spin text-accent" : ""}`}
+                strokeWidth="2"
+              >
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l6 6" />
+              </svg>
+              <span>{refreshing ? "Syncing..." : "Sync (60s Auto)"}</span>
+            </button>
           </div>
         </div>
 

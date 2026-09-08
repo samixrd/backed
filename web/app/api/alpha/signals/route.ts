@@ -38,15 +38,17 @@ function httpsGetJson<T>(url: string): Promise<T | null> {
   });
 }
 
-// In-memory cache for 10 seconds for high frequency sub-millisecond response
+// In-memory & Edge cache for 60 seconds (rate-limit safe for free tier)
 let cachedSignals: any = null;
 let lastCacheTime = 0;
-const CACHE_TTL = 10000;
+const CACHE_TTL = 60000;
 
 export async function GET() {
   const now = Date.now();
   if (cachedSignals && now - lastCacheTime < CACHE_TTL) {
-    return NextResponse.json(cachedSignals);
+    return NextResponse.json(cachedSignals, {
+      headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" },
+    });
   }
 
   try {
@@ -250,7 +252,9 @@ export async function GET() {
     cachedSignals = responseData;
     lastCacheTime = now;
 
-    return NextResponse.json(responseData);
+    return NextResponse.json(responseData, {
+      headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" },
+    });
   } catch (error: any) {
     return NextResponse.json(
       { ok: false, error: error.message || "Failed to generate alpha signals" },
