@@ -43,23 +43,87 @@ Most retail traders and autonomous agents are overwhelmed by complex derivatives
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        BINANCE AGENT OS RUNTIME                        │
 │                                                                        │
-│   [ Live Market Screener ]         [ Institutional Quant Models ]      │
-│   718 Binance Perpetual Contracts  VPIN Toxicity Flow Index            │
-│   Top Trader Long/Short Bias  ──>  Top Trader Margin Beta (Divergence) │
-│   Taker Flow Aggression Imbalance  4-Quadrant Velocity State Engine    │
-│   Open Interest in USD             Basis Dislocation & Funding Squeeze │
+│  LAYER 1 — LIVE DATA INGESTION (Binance Futures API)                   │
+│  ├─ fapi/v1/ticker/24hr        → 718 USDT perpetuals, price, volume   │
+│  ├─ fapi/v1/premiumIndex       → Funding rate, mark/index price basis  │
+│  ├─ futures/data/topLong..     → Top Trader Long/Short account ratio   │
+│  ├─ futures/data/takerlong..   → Taker Buy/Sell volume flow ratio      │
+│  └─ fapi/v1/openInterest       → Open Interest in USD per contract     │
 │                                                                        │
-│   [ Non-Custodial Blueprints ]     [ Provable BSC Testnet Anchor ]     │
-│   Calculates Limit Entry Zone      decisionHash = SHA256(canonical)   │
-│   Hard Stop-Loss & Take-Profit     reasonHash   = SHA256(reasoning)    │
-│   Statistical +EV% Verification    Zero IP Leakage / Anti-Backdating   │
+│  LAYER 2 — QUANT COMPUTATION ENGINE (/api/alpha/signals)               │
+│  ├─ VPIN Index        = |BuyVol - SellVol| / (BuyVol + SellVol)       │
+│  ├─ Margin Beta (βTT) = (TopTraderLongPct - 50) / 10                  │
+│  ├─ 4-Quadrant State = f(24h price change, Taker Buy/Sell ratio)       │
+│  ├─ Basis Spread      = (MarkPrice - IndexPrice) / IndexPrice × 100    │
+│  └─ +EV%             = (WinProb × TpGain) - (LossPpob × SlLoss)       │
 │                                                                        │
-│   [ Universal MCP Server ]         [ Edge-Optimized Infrastructure ]   │
-│   Claude Code / Cursor / Codex     60s In-Memory Cache TTL             │
-│   Grok (xAI) / Hermes / CCXT       Vercel Edge Stale-While-Revalidate  │
-│   Protocol: JSON-RPC 2.0 (v2)      Zero 429 Rate-Limit / Free-Tier Safe│
+│  LAYER 3 — 5-MODEL ALPHA CLASSIFIER (Multi-Factor Signal Engine)       │
+│  ├─ NEGATIVE_FUNDING_SQUEEZE   → Short squeeze trap alpha              │
+│  ├─ WHALE_EXIT_TRAP            → Distribution into retail bids         │
+│  ├─ FLOW_ABSORPTION            → Institutional VPIN accumulation       │
+│  ├─ LIQUIDATION_FLUSH_REVERSAL → Cascade bottom mean-reversion         │
+│  └─ MOMENTUM_EXPANSION         → Q1 capital inflow continuation        │
+│                                                                        │
+│  LAYER 4 — NON-CUSTODIAL BLUEPRINT GENERATOR                           │
+│  ├─ Limit Entry Zone, Hard Stop-Loss, TP1, TP2 (1:2.4 R/R)            │
+│  ├─ decisionHash = SHA256(symbol + price + side + sl + tp1 + ts)       │
+│  ├─ Claude Code CLI one-liner (natural language execution prompt)       │
+│  ├─ Python CCXT snippet (BACKED does NOT touch funds — agent executes) │
+│  └─ MCP Tool Call JSON (backed_calculate_intent_trade_setup)           │
+│                                                                        │
+│  LAYER 5 — UNIVERSAL MCP SERVER (/api/mcp — JSON-RPC 2.0)             │
+│  ├─ backed_get_market_overview        → Macro futures telemetry        │
+│  ├─ backed_get_screener_all_contracts → 718-contract screener          │
+│  ├─ backed_get_smart_money_intel      → Deep per-symbol derivatives    │
+│  ├─ backed_get_whale_exhaustion_signals → Whale trap front-run shield  │
+│  └─ backed_calculate_intent_trade_setup → Blueprint + BSC anchor hash  │
+│                                                                        │
+│  LAYER 6 — EDGE INFRASTRUCTURE (Vercel + In-Memory Cache)             │
+│  ├─ 60s In-Memory Cache TTL → prevents redundant Binance calls         │
+│  ├─ Cache-Control: s-maxage=60, stale-while-revalidate=120             │
+│  ├─ Binance limit: 2,400 req/min → BACKED uses < 120/min (5%)         │
+│  └─ 24/7 Cron via /api/run → Vercel Cron + Uptime keep-alive          │
 └────────────────────────────────────────────────────────────────────────┘
 ```
+
+### Web Terminal — 4 Live Tabs (`web/app/page.tsx`)
+
+| Tab | Component | What It Does |
+|---|---|---|
+| **Market Overview** | `market-overview.tsx` | Macro Binance Futures dashboard: total volume, total OI (USD), liquidations, global long/short breadth across 700+ contracts |
+| **Token Screener** | `token-screener.tsx` | Real-time search and filter table across all 718 USDT perpetual contracts with sorting by OI, funding, volume, and Top Trader bias |
+| **Smart Money** | `smart-money.tsx` | 50-coin institutional positioning scatter plot — maps Top Trader long% vs Taker flow aggression to visualize where whales are positioned |
+| **Quant Alpha & Workflows** | `quant-alpha-section.tsx` | Full quant terminal: Live Alpha Radar (5-model filter), Deep Quant Inspector (4-quadrant badge, VPIN, thesis, blueprint), 1-click agent execution tabs (Claude Code / Python / MCP), BSC Testnet anchor proof panel |
+
+### API Routes (`web/app/api/`)
+
+| Route | Status | Purpose |
+|---|---|---|
+| `/api/alpha/signals` | **Live** | Core quant alpha engine — scans top 40 contracts, computes all 5 quant models, returns signals with blueprints and BSC hashes |
+| `/api/mcp` | **Live** | JSON-RPC 2.0 MCP server — 5 tools for external agents (Claude Code, Cursor, Grok, Codex, Hermes) |
+| `/api/market/overview` | **Live** | Aggregate macro futures stats — total volume, OI, liquidations |
+| `/api/screener` | **Live** | 718-contract live screener with derivatives metrics per symbol |
+| `/api/intel` | **Live** | Deep single-symbol derivatives intelligence + corroborated spot price |
+| `/api/copilot` | **Live** | Universal intent engine — parses natural language queries into structured alpha responses |
+| `/api/run` | **Live** | 24/7 autonomous pipeline cron runner |
+| `/api/openapi.json` | **Live** | OpenAPI 3.1 spec for Codex / Custom GPTs |
+| `/api/trade/execute` | Scaffolded | Non-custodial execution blueprint route (external agents call their own exchange) |
+| `/api/trade/close` | Scaffolded | Non-custodial close blueprint route |
+
+### `src/` — Node.js Pipeline (Autonomous Fund Loop)
+
+| File | What It Does |
+|---|---|
+| `market-intel.ts` | Ingests live Binance Futures derivatives, OI, and Taker flow |
+| `reasoning.ts` | Azure GPT-4o-mini structured intelligence — synthesizes raw derivatives into alpha narratives |
+| `pipeline.ts` | Autonomous loop: ingest → reason → anchor → persist |
+| `anchor.ts` | BSC Testnet onchain commit — writes `decisionHash` and `reasonHash` as immutable timestamps |
+| `verifier.ts` | Independent cryptographic audit agent — re-derives hash and verifies no tampering |
+| `datasource.ts` | Multi-source price corroboration (Binance Spot + Coinbase Spot, tolerance ≤ 0.5%) |
+| `canonical.ts` | Deterministic JSON serialization — ensures hash reproducibility (Trust Root) |
+| `provable.ts` | SHA-256 hash-chaining and proof math |
+| `mcp-client.ts` | Binance Agentic MCP client (OAuth + JSON-RPC) |
+| `store.ts` | Supabase (`backed` schema) + LocalStore persistence |
 
 ---
 
