@@ -126,3 +126,15 @@ D:\BACKED\
 - [x] Configured resilient price corroboration combining Binance Spot, Coinbase Spot, and Binance Futures Mark prices.
 - [x] Established 24/7 autonomous pipeline execution via Vercel Cron and edge keep-alive.
 - [x] Conducted full security audit: zero secrets or sensitive keys pushed to GitHub.
+
+### Phase 8: Hardcore Quant Alpha Engine & 100% Non-Custodial Architecture — [COMPLETED & LIVE]
+- [x] Implemented real quantitative formulas in `/api/alpha/signals`:
+  - **VPIN (Volume-Synchronized Probability of Toxicity):** Measures informed institutional order flow.
+  - **Top Trader Margin Beta ($\beta_{\text{TT}}$):** Institutional whale divergence vs retail crowd sentiment.
+  - **4-Quadrant Velocity Matrix:** $Q_1$ Capital Expansion, $Q_2$ Short-Covering Exhaustion, $Q_3$ Institutional Shorting, $Q_4$ Liquidation Flush Reversal.
+  - **Statistical Expected Value ($+EV\%$):** Mathematically verifies positive expectation before broadcast.
+- [x] Built `QuantAlphaSection` terminal interface with Live Quant Alpha Radar, Deep Quant Inspector, and non-custodial risk blueprints (Limit Entry, Hard SL, TP1, TP2).
+- [x] 1-Click External Agent Workflows: Claude Code CLI prompt, Python CCXT automation script, and MCP tool call JSON.
+- [x] 100% Non-Custodial guarantee: BACKED never holds, buys, or sells assets. All trades execute directly on external agent exchange accounts.
+- [x] Rate-Limit & Free-Tier Safety: 60s server cache TTL + Vercel Edge `stale-while-revalidate` header prevents Binance 429 IP blocks while maintaining sub-5ms latency.
+- [x] Expanded universal MCP server to 5 whole-market tools: market overview, 718-contract screener, smart money intel, whale shield, and trade setup calculations.

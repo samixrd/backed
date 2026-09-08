@@ -20,8 +20,6 @@ export function Hero() {
       <div className="mt-6 flex flex-wrap gap-3">
         <HeroStat label="Agent Runtime" value="Binance Agent OS" mono accent />
         <HeroStat label="Data & Tool Protocol" value="Binance Agentic MCP" mono />
-        <HeroStat label="Onchain Anchor" value="BSC Testnet (Live)" mono accent />
-        <HeroStat label="Verifier Verdict" value="PASS (Provable Alpha)" mono />
       </div>
     </section>
   );

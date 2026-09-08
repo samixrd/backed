@@ -6,7 +6,6 @@ import { TokenScreener } from "@/components/token-screener";
 import { SmartMoney } from "@/components/smart-money";
 import { MarketOverview } from "@/components/market-overview";
 import { QuantAlphaSection } from "@/components/quant-alpha-section";
-import { LiveSignalStream } from "@/components/live-signal-stream";
 import { ConnectModal, useAgentSession } from "@/components/connect-modal";
 import { McpIntegrateModal } from "@/components/mcp-integrate-modal";
 
@@ -73,12 +72,7 @@ export default function Home() {
           {tab === "overview" && <MarketOverview />}
           {tab === "screener" && <TokenScreener />}
           {tab === "smart"    && <SmartMoney />}
-          {tab === "intel"    && (
-            <div className="space-y-6">
-              <QuantAlphaSection />
-              <LiveSignalStream />
-            </div>
-          )}
+          {tab === "intel"    && <QuantAlphaSection />}
         </div>
 
         <Footer />
@@ -151,11 +145,45 @@ function Header({
 
 function Footer() {
   return (
-    <footer className="mt-16 border-t border-border pt-6 text-xs text-faint">
-      <p className="font-mono">
-        BACKED · Autonomous Market Intel Agent powered by Binance Agent OS.
-        All decisions are cryptographically anchored onto BNB Smart Chain (BSC Testnet).
-      </p>
+    <footer className="mt-20 border-t border-border/80 pt-8 pb-12 text-xs">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span className="font-mono font-bold tracking-tight text-foreground">BACKED</span>
+            <span className="text-border">·</span>
+            <span className="font-mono text-[11px] text-accent uppercase tracking-wider">
+              Autonomous Quant Alpha & Intel Oracle
+            </span>
+          </div>
+          <p className="font-mono text-[11px] text-muted max-w-2xl leading-relaxed">
+            BACKED · Autonomous Market Intel Agent powered by Binance Agent OS. All decisions are cryptographically anchored onto BNB Smart Chain (BSC Testnet).
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] text-faint">
+          <a
+            href="/api/mcp"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-accent transition-colors flex items-center gap-1"
+          >
+            <span>MCP Server</span>
+            <span className="text-[9px] text-accent">/api/mcp</span>
+          </a>
+          <span className="text-border">·</span>
+          <a
+            href="/api/openapi.json"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-accent transition-colors"
+          >
+            OpenAPI 3.1
+          </a>
+          <span className="text-border">·</span>
+          <span className="rounded border border-border bg-surface px-2 py-0.5 text-[10px] text-muted">
+            BSC Testnet (Chain ID: 97)
+          </span>
+        </div>
+      </div>
     </footer>
   );
 }

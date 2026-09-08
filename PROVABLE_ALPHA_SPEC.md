@@ -1,14 +1,11 @@
 # PROVABLE ALPHA — Architecture & Data-Quality Specification
 
-> **Product (one line):** An autonomous AI fund agent that researches, trades, and produces a
-> cryptographically-verifiable, tamper-evident performance record — proving it really did what it
-> says, **without revealing its strategy.**
+> **Product (one line):** A 24/7 autonomous quant alpha & market intel provider that computes mathematical models (VPIN, Margin Beta, 4-Quadrant Velocity) and produces a cryptographically-verifiable, tamper-evident performance record anchored on BSC Testnet for non-custodial external agent execution — proving signal authenticity **without leaking proprietary strategy IP.**
 >
-> **Differentiator:** *Binance Agent OS can't see my reasoning — only my settled trades. So I can
-> prove my record is real without leaking my edge.*
+> **Differentiator:** *Zero backdating bias and zero IP leakage. Every decision hash is anchored on BNB Smart Chain prior to dispatch, while external agents (Claude Code, Cursor, CCXT) execute directly on their own exchange accounts.*
 >
-> **Status:** Fully Implemented & Live in Production (v2.0). Deployed at https://backed-zeta.vercel.app
-> with BSC Testnet anchoring, Universal Intent Trading, Whale Trap Shield, and Model Context Protocol (MCP) server.
+> **Status:** Fully Implemented & Live in Production (v3.0). Deployed at https://backed-zeta.vercel.app
+> with BSC Testnet anchoring, Hardcore Quant Alpha Engine, 718-Contract Screener, and Model Context Protocol (MCP) server.
 
 ---
 
