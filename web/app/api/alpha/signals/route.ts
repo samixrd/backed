@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import https from "node:https";
-import { createHash } from "node:crypto";
 
 export const dynamic = "force-dynamic";
 
@@ -190,10 +189,6 @@ export async function GET() {
         const expectedValue = Number(((winProb * tpGain) - ((1 - winProb) * slLoss)).toFixed(2));
         const rrRatio = "1:2.4";
 
-        const rawHash = createHash("sha256")
-          .update(JSON.stringify({ s: t.symbol, p: price, side, sl: stopLoss, tp1: takeProfit1, ts: Math.floor(now / 60000) }))
-          .digest("hex");
-
         signals.push({
           symbol: t.symbol,
           base: t.symbol.replace("USDT", ""),
@@ -228,11 +223,6 @@ export async function GET() {
             claudeCode: `claude "Execute ${action} setup on ${t.symbol}: Entry ~${price}, Invalidation SL ${stopLoss}, Target TP ${takeProfit1} using my exchange account"`,
             pythonSnippet: `# Hardcore Non-Custodial Quant Execution (CCXT)\nimport ccxt\nexchange = ccxt.binanceusdm({'apiKey': 'YOUR_KEY', 'secret': 'YOUR_SECRET'})\norder = exchange.create_order('${t.symbol}', 'limit', '${side.toLowerCase()}', 1.0, ${price}, {'stopLossPrice': ${stopLoss}})`,
             mcpToolCall: `{"name":"backed_calculate_intent_trade_setup","arguments":{"symbol":"${t.symbol}","side":"${side}","amountUsd":50}}`,
-          },
-          provableAnchor: {
-            decisionHash: `0x${rawHash}`,
-            protocol: "Binance Agent OS (Non-Custodial)",
-            timestamp: new Date(now).toISOString(),
           },
         });
       }

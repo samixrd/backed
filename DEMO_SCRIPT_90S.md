@@ -1,9 +1,9 @@
 # BACKED — 1:30 Demo Script + Shot Map (matches live UI)
 
-> **UI ground truth (verified from code):** 4 tabs — Market Overview / Token Screener / Smart Money / Quant Alpha & Workflows. Decision-hash "Provable Anchor" badge lives inside the Quant Inspector. Header CTA = "External Agents (MCP)" modal (Claude Code / Claude.ai / Hermes tabs).
+> **UI ground truth (verified from code):** 4 tabs — Market Overview / Token Screener / Smart Money / Quant Alpha & Workflows. Header CTA = "External Agents (MCP)" modal (Claude Code / Claude.ai / Hermes tabs).
 > **Voice ~225 words @ 150wpm = 90s.** Bold = speak. 🖱 = exact mouse move.
 
-**Pre-flight:** tab 1 = `backed-zeta.vercel.app`, tab 2 = `testnet.bscscan.com`, terminal open with the MCP query pre-typed. Zoom 90%.
+**Pre-flight:** tab 1 = `backed-zeta.vercel.app`, terminal open with the MCP query pre-typed. Zoom 90%.
 
 ---
 
@@ -42,10 +42,12 @@
 
 ---
 
-## BEAT 6 — PROVABLE ANCHOR CLOSE · 1:15–1:30 · Inspector hash → cut
-**"And every decision is hashed SHA-256 and anchored on BNB Smart Chain before broadcast — the block timestamp proves the signal came first. Un-backdatable track record. Zero strategy IP leaked. Live seventy-eight market intelligence, provable alpha — that's BACKED."**
+## BEAT 6 — CLOSE · 1:15–1:30 · Quant tab → Hero
+**"No keys, no custody, no vibes. Live seven-eighteen-market perception, five institutional models, one-click agent workflows over MCP, and cryptographic hash on every blueprint before it ships. That's BACKED — quant alpha, provably dispatched, on Binance Agent OS."**
 
-🖱 Point at **Provable Anchor** hash badge in the inspector → flash the BSCScan testnet tx timestamp (1 sec) → cut on the final line.
+🖱 Alt-Tab back to the Quant tab: point at the MCP tool-call JSON block (the `decisionHash`/setup JSON in the workflow panel) → 1 sec on the "100% Non-Custodial" hero chip → cut.
+
+> **Note:** old "Provable Anchor / BSCScan" badge was REMOVED from the Quant Inspector (didn't match the non-custodial scanner identity). Do NOT show BSCScan tab in this cut.
 
 ---
 
@@ -57,7 +59,7 @@
 | 3 Map | 0:26–0:38 | Smart Money scatter | extra hovers |
 | 4 Alpha | 0:38–0:58 | Radar → SOL inspector | nothing — core |
 | 5 MCP | 0:58–1:15 | Claude/Python + terminal live | use B-roll |
-| 6 Anchor | 1:15–1:30 | Hash badge → BSCScan → cut | BSCScan flash |
+| 6 Close | 1:15–1:30 | MCP JSON → hero chip → cut | nothing — closing line |
 
 ## Recording Rules
 - One take per beat, stitch in CapCut. Never attempt a single 90-sec take.

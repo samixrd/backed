@@ -41,12 +41,6 @@ interface AlphaSignal {
   thesis: string;
   tradeSetup: TradeSetup;
   workflows: Workflows;
-  provableAnchor: {
-    decisionHash: string;
-    protocol?: string;
-    network?: string;
-    timestamp: string;
-  };
 }
 
 function fmtUsd(n: number): string {
@@ -478,13 +472,6 @@ export function QuantAlphaSection() {
                   )}
                 </div>
 
-                {/* Cryptographic Verification Proof */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-accent/15 text-[10px] text-muted">
-                  <span>
-                    Provable Anchor: <code className="text-foreground">{active.provableAnchor.decisionHash.slice(0, 18)}...</code>
-                  </span>
-                  <span>{active.provableAnchor.protocol || active.provableAnchor.network || "Binance Agent OS"} · Zero Backdating Bias</span>
-                </div>
               </div>
             </>
           ) : (
