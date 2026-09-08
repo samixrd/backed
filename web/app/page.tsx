@@ -5,8 +5,7 @@ import { Hero } from "@/components/hero";
 import { TokenScreener } from "@/components/token-screener";
 import { SmartMoney } from "@/components/smart-money";
 import { MarketOverview } from "@/components/market-overview";
-import { MarketIntelSection } from "@/components/market-intel-section";
-import { CopilotTerminal } from "@/components/copilot-terminal";
+import { QuantAlphaSection } from "@/components/quant-alpha-section";
 import { LiveSignalStream } from "@/components/live-signal-stream";
 import { ConnectModal, useAgentSession } from "@/components/connect-modal";
 import { McpIntegrateModal } from "@/components/mcp-integrate-modal";
@@ -15,7 +14,7 @@ const TABS = [
   { id: "overview",  label: "Market Overview",  desc: "Macro volume, OI & 700+ breadth" },
   { id: "screener",  label: "Token Screener",    desc: "718 Live Binance Perps" },
   { id: "smart",     label: "Smart Money",       desc: "Top institutional positioning & bias" },
-  { id: "intel",     label: "AI Alpha & Anchor", desc: "AI synthesis + onchain anchoring" },
+  { id: "intel",     label: "Quant Alpha & Workflows", desc: "Systematic alpha signals & agent execution" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -76,8 +75,7 @@ export default function Home() {
           {tab === "smart"    && <SmartMoney />}
           {tab === "intel"    && (
             <div className="space-y-6">
-              <MarketIntelSection />
-              <CopilotTerminal />
+              <QuantAlphaSection />
               <LiveSignalStream />
             </div>
           )}
