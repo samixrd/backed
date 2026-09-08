@@ -1,8 +1,8 @@
 node_modules/
 dist/
 *.log
-.env
-.env.local
+.env*
+!.env.example
 .backed-data/
 .DS_Store
 *.tsbuildinfo
