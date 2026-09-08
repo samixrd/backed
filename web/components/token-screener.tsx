@@ -449,7 +449,7 @@ export function TokenScreener() {
           Data Pipeline: Binance Agent OS · Direct ingestion from Binance Futures Public API (`fapi.binance.com`)
         </span>
         <span>
-          Cryptographically Anchored on BNB Smart Chain (BSC Testnet)
+          Quant Models: VPIN · Margin Beta · 4-Quadrant OI Velocity · Basis Spread
         </span>
       </div>
     </div>

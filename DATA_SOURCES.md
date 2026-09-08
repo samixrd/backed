@@ -68,11 +68,14 @@ Binance enforces a strict 2400/min weight limit on public endpoints. BACKED empl
 
 ---
 
-## 5. Onchain Anchoring (BNB Smart Chain)
+## 5. Non-Custodial Workflow Dispatch
 
-- **Network:** BNB Smart Chain (BSC Testnet)
-- **Chain ID:** `97`
-- **RPC:** `https://data-seed-prebsc-1-s1.binance.org:8545`
-- **Explorer:** [https://testnet.bscscan.com](https://testnet.bscscan.com)
-- **Commit Payload:** `0x` + 32-byte SHA-256 digest of canonical decision and reasoning hashes.
-- **Proof:** Immutable block timestamp proof anchors the trade setup prior to external agent execution (anti-backdating).
+Every signal computed by the quant engine is packaged into a ready-to-execute blueprint for external agents. BACKED does not execute any trades.
+
+| Workflow Format | Description |
+|---|---|
+| **Claude Code CLI** | Natural language prompt: `claude "Execute LONG setup on BTCUSDT: Entry ~price, SL stop, TP target"` |
+| **Python CCXT Snippet** | Pre-filled `ccxt.binanceusdm` order with symbol, side, price, stopLossPrice — agent pastes their own API key |
+| **MCP Tool Call JSON** | `backed_calculate_intent_trade_setup` — structured JSON-RPC call any agent can invoke directly |
+
+All blueprint parameters (entry range, stop-loss, take-profit, R/R ratio, +EV%) are derived purely from live Binance Futures data and the quant computation layer above. No hallucinated prices. No manual overrides.

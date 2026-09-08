@@ -127,7 +127,7 @@ export function MarketOverview() {
   const [gainersTimeframe, setGainersTimeframe] = useState<"5m" | "30m" | "4h" | "24h">("24h");
   const [oiTimeframe, setOiTimeframe] = useState<"5m" | "30m" | "4h" | "24h">("24h");
   const [selectedTile, setSelectedTile] = useState<string | null>(null);
-  const [activeViewMode, setActiveViewMode] = useState<"symbol" | "exchanges">("symbol");
+  const [activeViewMode, setActiveViewMode] = useState<"symbol">("symbol");
 
   async function loadData() {
     try {
@@ -498,24 +498,10 @@ export function MarketOverview() {
               ))}
             </div>
 
-            <div className="flex items-center rounded-lg border border-border bg-background p-1 text-[11px]">
-              <button
-                onClick={() => setActiveViewMode("symbol")}
-                className={`px-3 py-1 rounded font-medium transition-colors ${
-                  activeViewMode === "symbol" ? "bg-surface-raised text-foreground font-bold" : "text-muted hover:text-foreground"
-                }`}
-              >
-                Symbol
-              </button>
-              <button
-                onClick={() => setActiveViewMode("exchanges")}
-                className={`px-3 py-1 rounded font-medium transition-colors ${
-                  activeViewMode === "exchanges" ? "bg-surface-raised text-foreground font-bold" : "text-muted hover:text-foreground"
-                }`}
-              >
-                Exchanges
-              </button>
-            </div>
+
+            <span className="rounded border border-border bg-surface px-3 py-1.5 font-mono text-[10px] text-muted">
+              Binance Futures · All Symbols
+            </span>
           </div>
         </div>
 

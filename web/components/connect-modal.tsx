@@ -200,7 +200,7 @@ export function ConnectModal({
                 </div>
 
                 <div className="pt-2 border-t border-success/15 text-[10px] text-muted leading-relaxed">
-                  Your natural language trade intents in Copilot will execute autonomously via this session and anchor settlement proofs to BSC Testnet.
+                  Connected as a read-only Binance Agent OS session. BACKED dispatches quant alpha workflows via MCP — your agent executes trades directly on your own exchange account. BACKED does not buy, sell, or hold funds.
                 </div>
               </div>
 
@@ -259,7 +259,7 @@ export function ConnectModal({
                     <div className="flex items-center gap-2 pt-1 text-[10px] text-faint">
                       <span>✓ Real Binance Futures Orderbook</span>
                       <span>✓ Zero Regulatory Risk</span>
-                      <span>✓ Real BSC Testnet Anchoring</span>
+                      <span>✓ Non-Custodial MCP Workflows</span>
                     </div>
                   </div>
 
