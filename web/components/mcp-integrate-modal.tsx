@@ -76,7 +76,8 @@ export function McpIntegrateModal({
   );
 
   const grokMcpJson = mcpJson;
-  const grokPython = `# xAI Grok (Grok-2) + BACKED Smart Money Intel
+  const grokPython = `# xAI Grok (Grok-2) + BACKED 24/7 Institutional Intel
+# BACKED does NOT buy/sell/hold. Grok ingests live alpha to trade autonomously.
 from openai import OpenAI
 import requests
 
@@ -85,17 +86,20 @@ client = OpenAI(
     base_url="https://api.x.ai/v1",
 )
 
-intel = requests.get("${PROD_URL}/api/intel?symbol=SOLUSDT").json()
+# 1. Ingest 24/7 Market Overview and Screener
+overview = requests.get("${PROD_URL}/api/market/overview").json()
+screener = requests.get("${PROD_URL}/api/screener").json()
+
 prompt = (
-    f"SOL Smart Money: {intel.get('regime')} | "
-    f"{intel.get('topLongPct')}% Long | Taker: {intel.get('takerRatio')}x. "
-    "Formulate quant trade rationale."
+    f"Market Sentiment: {overview.get('sentiment')}. Total 24h Volume USD: {overview.get('total24hVolumeUsd')}. "
+    f"Active Coins in Smart Accumulation: {len(screener.get('contracts', []))}. "
+    "Select top 2 alpha setups for autonomous execution on Binance."
 )
 
 resp = client.chat.completions.create(
     model="grok-2-latest",
     messages=[
-        {"role": "system", "content": "You are a quant agent on Binance Agent OS powered by BACKED."},
+        {"role": "system", "content": "You are a quant trading agent powered by BACKED 24/7 market intelligence."},
         {"role": "user", "content": prompt},
     ],
 )
@@ -110,13 +114,15 @@ print(resp.choices[0].message.content)`;
   backed:
     url: "${PROD_URL}/api/mcp"
     timeout: 60
-    # auto-discovered tools:
+    # 24/7 All-Market Intelligence Tools (Non-Custodial):
+    #  mcp__backed__backed_get_market_overview
+    #  mcp__backed__backed_get_screener_all_contracts
     #  mcp__backed__backed_get_smart_money_intel
-    #  mcp__backed__backed_execute_intent_trade
-    #  mcp__backed__backed_smart_exit_whale_shield`;
+    #  mcp__backed__backed_get_whale_exhaustion_signals
+    #  mcp__backed__backed_calculate_intent_trade_setup`;
 
   const openApiUrl = `${PROD_URL}/api/openapi.json`;
-  const codexPython = `# OpenAI Codex — call BACKED via JSON-RPC 2.0
+  const codexPython = `# OpenAI Codex — call BACKED 24/7 Intel via JSON-RPC 2.0
 import httpx, asyncio
 
 async def backed(tool: str, args: dict):
@@ -129,11 +135,14 @@ async def backed(tool: str, args: dict):
     return r.json()["result"]["content"][0]["text"]
 
 async def main():
-    print(await backed("backed_get_smart_money_intel", {"symbol": "BTCUSDT"}))
+    # Fetch 24/7 global market overview across 718 contracts
+    print(await backed("backed_get_market_overview", {}))
 
 asyncio.run(main())`;
 
   const pythonMcp = `# Universal Python MCP Client — LangChain / CrewAI / AutoGen / custom
+# 24/7 Non-Custodial Market Intelligence Oracle across 718 Binance contracts.
+# BACKED does NOT buy/sell/hold — your agent executes on your own exchange account.
 import asyncio, httpx
 
 async def call_backed(tool_name: str, args: dict) -> str:
@@ -150,13 +159,24 @@ async def call_backed(tool_name: str, args: dict) -> str:
         return res.json()["result"]["content"][0]["text"]
 
 async def main():
-    intel = await call_backed("backed_get_smart_money_intel", {"symbol": "BTCUSDT"})
-    print("Intel:", intel)
-    trade = await call_backed("backed_execute_intent_trade",
-                               {"symbol": "BTCUSDT", "side": "BUY", "amountUsd": 5})
-    print("Trade:", trade)
-    exit_ = await call_backed("backed_smart_exit_whale_shield", {"symbol": "BTCUSDT"})
-    print("Exit:", exit_)
+    # 1. 24/7 Global Market Overview (Volume, Open Interest, Sentiment)
+    overview = await call_backed("backed_get_market_overview", {})
+    print("Market Overview:", overview)
+
+    # 2. 24/7 Screener across all 718 Binance Perpetual Contracts
+    screener = await call_backed("backed_get_screener_all_contracts", {
+        "regime": "Smart Accumulation",
+        "limit": 5
+    })
+    print("Smart Accumulation Coins:", screener)
+
+    # 3. Deep Contract Intel (Order flow, Taker ratio, AI setup)
+    intel = await call_backed("backed_get_smart_money_intel", {"symbol": "SOLUSDT"})
+    print("SOL Intel:", intel)
+
+    # 4. Whale Trap Shield (Front-run dumps & protect positions)
+    traps = await call_backed("backed_get_whale_exhaustion_signals", {"limit": 5})
+    print("Whale Warnings:", traps)
 
 asyncio.run(main())`;
 
@@ -166,8 +186,8 @@ asyncio.run(main())`;
     "jsonrpc": "2.0", "id": 1,
     "method": "tools/call",
     "params": {
-      "name": "backed_get_smart_money_intel",
-      "arguments": {"symbol": "SOLUSDT"}
+      "name": "backed_get_market_overview",
+      "arguments": {}
     }
   }' | python3 -m json.tool`;
 
@@ -299,7 +319,7 @@ asyncio.run(main())`;
         {/* Scrollable Modal Body */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
           <p className="text-xs text-muted leading-relaxed">
-            BACKED is a universal MCP server. Any agent below can discover 718-contract smart money derivatives, execute intent trades, and trigger Whale Trap Shield exits directly from their runtime.
+            BACKED is a 24/7 institutional intelligence oracle for Binance Agent OS. We do not hold funds or execute orders — your external agents ingest our real-time smart money flow across all 718 perpetual contracts and execute intent trades directly in their own runtime.
           </p>
 
           {activeTab === "claude_code" && (
@@ -311,7 +331,8 @@ asyncio.run(main())`;
                 code={claudeCmd} copyId="claude_cmd" copyLabel="Copy Command"
                 tips={[
                   { cmd: "claude mcp list", label: "verify backed appears" },
-                  { cmd: '"Check smart money on SOLUSDT"', label: "say in Claude Code" },
+                  { cmd: '"Show me all coins in Smart Accumulation right now"', label: "say in Claude Code" },
+                  { cmd: '"Get 24/7 market overview and top institutional flow"', label: "say in Claude Code" },
                 ]}
               />
               <Section
@@ -353,12 +374,13 @@ asyncio.run(main())`;
               <Section
                 recommended badge="Recommended"
                 title="Grok in IDE — MCP Server Config"
-                desc="If using Grok inside Cursor or any MCP-aware IDE, add BACKED as a persistent MCP server. Grok auto-calls all 3 BACKED tools without any extra code."
+                desc="If using Grok inside Cursor or any MCP-aware IDE, add BACKED as a persistent MCP server. Grok auto-discovers 24/7 market overview, screener across 718 contracts, and smart money intel."
                 code={grokMcpJson} copyId="grok_mcp" copyLabel="Copy JSON"
                 tips={[
-                  { cmd: "backed_get_smart_money_intel", label: "auto-callable tool" },
-                  { cmd: "backed_execute_intent_trade", label: "auto-callable tool" },
-                  { cmd: "backed_smart_exit_whale_shield", label: "auto-callable tool" },
+                  { cmd: "backed_get_market_overview", label: "24/7 global market stats" },
+                  { cmd: "backed_get_screener_all_contracts", label: "screener across 718 perps" },
+                  { cmd: "backed_get_smart_money_intel", label: "deep symbol alpha" },
+                  { cmd: "backed_get_whale_exhaustion_signals", label: "whale trap warnings" },
                 ]}
               />
               <Section
@@ -381,7 +403,8 @@ asyncio.run(main())`;
                 code={hermesDesktopJson} copyId="hermes_desktop" copyLabel="Copy JSON"
                 tips={[
                   { cmd: "Settings -> MCP Servers -> Import JSON", label: "navigation" },
-                  { cmd: "mcp__backed__backed_get_smart_money_intel", label: "tool prefix after import" },
+                  { cmd: "backed_get_market_overview", label: "auto-discovered tool" },
+                  { cmd: "backed_get_screener_all_contracts", label: "auto-discovered tool" },
                 ]}
               />
               <Section
@@ -404,7 +427,7 @@ asyncio.run(main())`;
               <Section
                 recommended badge="Recommended"
                 title="Custom GPT / Codex — OpenAPI 3.1 Import URL"
-                desc="In ChatGPT: Create a GPT -> Actions -> Import from URL. Paste this URL — all 3 BACKED tools instantly available as GPT Actions with full schema."
+                desc="In ChatGPT: Create a GPT -> Actions -> Import from URL. Paste this URL — all 24/7 BACKED intelligence endpoints instantly available as GPT Actions with full schema."
                 code={openApiUrl} copyId="codex_url" copyLabel="Copy URL"
                 tips={[
                   { cmd: "ChatGPT -> Create a GPT -> Actions -> Import from URL", label: "navigation" },
@@ -426,8 +449,8 @@ asyncio.run(main())`;
             <div className="space-y-4">
               <Section
                 recommended badge="Full Client"
-                title="Python Async MCP Client — All 3 Tools"
-                desc="Drop-in async client for LangChain, CrewAI, AutoGen, or any custom Python agent. Calls all 3 BACKED tools over standard JSON-RPC 2.0."
+                title="Python Async MCP Client — 24/7 Market Intel"
+                desc="Drop-in async client for LangChain, CrewAI, AutoGen, or any custom Python agent. Calls all 24/7 BACKED intelligence tools over standard JSON-RPC 2.0."
                 code={pythonMcp} copyId="python_full" copyLabel="Copy Client"
                 tips={[
                   { cmd: "pip install httpx", label: "only dependency" },

@@ -10,13 +10,31 @@ export async function GET(req: Request) {
   const spec = {
     openapi: "3.1.0",
     info: {
-      title: "BACKED - Binance Agent OS Market Intel & Trade API",
+      title: "BACKED - 24/7 Binance Futures Market Intel & Alpha Oracle",
       version: "1.0.0",
       description:
-        "Institutional Smart Money Intel, Autonomous Trading Intent Execution, and BSC Testnet Settlement Proofs for Codex, Claude, Grok (xAI) & Hermes.",
+        "24/7 Institutional Smart Money Intel, 718-contract Screener, Whale Trap Alerts, and Non-Custodial Trade Planning for Codex, Claude, Grok (xAI) & Hermes.",
     },
     servers: [{ url: baseUrl }],
     paths: {
+      "/api/market/overview": {
+        get: {
+          summary: "24/7 Global Binance Futures Market Intelligence",
+          operationId: "getMarketOverview",
+          responses: {
+            "200": { description: "Full market volume, open interest, fear & greed sentiment, and top surging contracts." },
+          },
+        },
+      },
+      "/api/screener": {
+        get: {
+          summary: "24/7 Screener Across All 718 Binance Perpetual Contracts",
+          operationId: "getContractScreener",
+          responses: {
+            "200": { description: "Filtered and ranked perpetual contracts with institutional regimes and taker ratios." },
+          },
+        },
+      },
       "/api/intel": {
         get: {
           summary: "Get Real-Time Smart Money Derivatives Intel for a Symbol",
@@ -37,7 +55,7 @@ export async function GET(req: Request) {
       },
       "/api/trade/execute": {
         post: {
-          summary: "Autonomous Intent Trade Execution",
+          summary: "Calculate Non-Custodial Intent Trade Parameters",
           operationId: "executeIntentTrade",
           requestBody: {
             required: true,
@@ -57,13 +75,13 @@ export async function GET(req: Request) {
             },
           },
           responses: {
-            "200": { description: "Filled Binance order receipt with BSC Testnet anchor hash." },
+            "200": { description: "Trade parameters, target, invalidation, and BSC Testnet decision hash." },
           },
         },
       },
       "/api/trade/close": {
         post: {
-          summary: "Whale Trap Shield Front-Run Exit",
+          summary: "Whale Trap Shield Front-Run Exit Signal",
           operationId: "smartExitWhaleShield",
           requestBody: {
             required: true,
@@ -84,7 +102,7 @@ export async function GET(req: Request) {
             },
           },
           responses: {
-            "200": { description: "Position closed with realized PnL and BSC Testnet settlement hash." },
+            "200": { description: "Exit signal with realized PnL calculations and BSC Testnet settlement hash." },
           },
         },
       },
