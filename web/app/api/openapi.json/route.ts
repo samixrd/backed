@@ -53,6 +53,15 @@ export async function GET(req: Request) {
           },
         },
       },
+      "/api/alpha/signals": {
+        get: {
+          summary: "Live Institutional Quant Alpha Signals (VPIN, Margin Beta, 4-Quadrant, Blueprints)",
+          operationId: "getQuantAlphaSignals",
+          responses: {
+            "200": { description: "Scanned signals with VPIN, Margin Beta, 4-Quadrant Velocity State, risk blueprints, and workflows." },
+          },
+        },
+      },
       "/api/trade/execute": {
         post: {
           summary: "Calculate Non-Custodial Intent Trade Parameters",
@@ -65,8 +74,8 @@ export async function GET(req: Request) {
                   type: "object",
                   properties: {
                     symbol: { type: "string", example: "SOLUSDT" },
-                    side: { type: "string", enum: ["BUY", "SELL"], example: "BUY" },
-                    amountUsd: { type: "number", example: 5 },
+                    side: { type: "string", enum: ["BUY", "SELL"], default: "BUY" },
+                    amountUsd: { type: "number", example: 50 },
                     strategyReasoning: { type: "string", example: "Smart money 70.4% Long" },
                   },
                   required: ["symbol", "side", "amountUsd"],
@@ -75,7 +84,7 @@ export async function GET(req: Request) {
             },
           },
           responses: {
-            "200": { description: "Trade parameters, target, invalidation, and BSC Testnet decision hash." },
+            "200": { description: "Non-custodial trade parameters, target, invalidation, expected value (+EV%), and execution blueprint." },
           },
         },
       },
@@ -102,7 +111,7 @@ export async function GET(req: Request) {
             },
           },
           responses: {
-            "200": { description: "Exit signal with realized PnL calculations and BSC Testnet settlement hash." },
+            "200": { description: "Non-custodial exit signal with realized PnL calculations and derisking blueprint." },
           },
         },
       },

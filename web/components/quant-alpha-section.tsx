@@ -43,7 +43,8 @@ interface AlphaSignal {
   workflows: Workflows;
   provableAnchor: {
     decisionHash: string;
-    network: string;
+    protocol?: string;
+    network?: string;
     timestamp: string;
   };
 }
@@ -482,7 +483,7 @@ export function QuantAlphaSection() {
                   <span>
                     Provable Anchor: <code className="text-foreground">{active.provableAnchor.decisionHash.slice(0, 18)}...</code>
                   </span>
-                  <span>{active.provableAnchor.network} · Zero Backdating Bias</span>
+                  <span>{active.provableAnchor.protocol || active.provableAnchor.network || "Binance Agent OS"} · Zero Backdating Bias</span>
                 </div>
               </div>
             </>

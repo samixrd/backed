@@ -72,11 +72,14 @@ Most retail traders and autonomous agents are overwhelmed by complex derivatives
 │  └─ MCP Tool Call JSON (backed_calculate_intent_trade_setup)           │
 │                                                                        │
 │  LAYER 5 — UNIVERSAL MCP SERVER (/api/mcp — JSON-RPC 2.0)             │
-│  ├─ backed_get_market_overview        → Macro futures telemetry        │
-│  ├─ backed_get_screener_all_contracts → 718-contract screener          │
-│  ├─ backed_get_smart_money_intel      → Deep per-symbol derivatives    │
+│  ├─ backed_get_quant_alpha_signals   → 5 Quant models + visual charts  │
+│  ├─ backed_get_market_overview       → Macro telemetry + Mermaid pie   │
+│  ├─ backed_get_screener_all_contracts→ 718-contract screener + ranking │
+│  ├─ backed_get_smart_money_intel     → Deep symbol alpha + trade setup │
+│  ├─ backed_get_smart_money_clusters  → 50-Coin scatter clusters        │
 │  ├─ backed_get_whale_exhaustion_signals → Whale trap front-run shield  │
-│  └─ backed_calculate_intent_trade_setup → Blueprint + BSC anchor hash  │
+│  ├─ backed_calculate_intent_trade_setup → Risk blueprint + Python CCXT │
+│  └─ backed_smart_exit_whale_shield   → Position protection + derisking │
 │                                                                        │
 │  LAYER 6 — EDGE INFRASTRUCTURE (Vercel + In-Memory Cache)             │
 │  ├─ 60s In-Memory Cache TTL → prevents redundant Binance calls         │
@@ -93,14 +96,14 @@ Most retail traders and autonomous agents are overwhelmed by complex derivatives
 | **Market Overview** | `market-overview.tsx` | Macro Binance Futures dashboard: total volume, total OI (USD), liquidations, global long/short breadth across 700+ contracts |
 | **Token Screener** | `token-screener.tsx` | Real-time search and filter table across all 718 USDT perpetual contracts with sorting by OI, funding, volume, and Top Trader bias |
 | **Smart Money** | `smart-money.tsx` | 50-coin institutional positioning scatter plot — maps Top Trader long% vs Taker flow aggression to visualize where whales are positioned |
-| **Quant Alpha & Workflows** | `quant-alpha-section.tsx` | Full quant terminal: Live Alpha Radar (5-model filter), Deep Quant Inspector (4-quadrant badge, VPIN, thesis, blueprint), 1-click agent execution tabs (Claude Code / Python / MCP), BSC Testnet anchor proof panel |
+| **Quant Alpha & Workflows** | `quant-alpha-section.tsx` | Full quant terminal: Live Alpha Radar (5-model filter), Deep Quant Inspector (4-quadrant badge, VPIN, thesis, blueprint), 1-click agent execution tabs (Claude Code / Python / MCP) |
 
 ### API Routes (`web/app/api/`)
 
 | Route | Status | Purpose |
 |---|---|---|
-| `/api/alpha/signals` | **Live** | Core quant alpha engine — scans top 40 contracts, computes all 5 quant models, returns signals with blueprints and BSC hashes |
-| `/api/mcp` | **Live** | JSON-RPC 2.0 MCP server — 5 tools for external agents (Claude Code, Cursor, Grok, Codex, Hermes) |
+| `/api/alpha/signals` | **Live** | Core quant alpha engine — scans top 40 contracts, computes all 5 quant models, returns signals with blueprints |
+| `/api/mcp` | **Live** | Universal JSON-RPC 2.0 MCP server — 8 tools for external agents (Claude Code, Cursor, Grok, Codex, Hermes) with visual charts |
 | `/api/market/overview` | **Live** | Aggregate macro futures stats — total volume, OI, liquidations |
 | `/api/screener` | **Live** | 718-contract live screener with derivatives metrics per symbol |
 | `/api/intel` | **Live** | Deep single-symbol derivatives intelligence + corroborated spot price |
@@ -109,21 +112,6 @@ Most retail traders and autonomous agents are overwhelmed by complex derivatives
 | `/api/openapi.json` | **Live** | OpenAPI 3.1 spec for Codex / Custom GPTs |
 | `/api/trade/execute` | Scaffolded | Non-custodial execution blueprint route (external agents call their own exchange) |
 | `/api/trade/close` | Scaffolded | Non-custodial close blueprint route |
-
-### `src/` — Node.js Pipeline (Autonomous Fund Loop)
-
-| File | What It Does |
-|---|---|
-| `market-intel.ts` | Ingests live Binance Futures derivatives, OI, and Taker flow |
-| `reasoning.ts` | Azure GPT-4o-mini structured intelligence — synthesizes raw derivatives into alpha narratives |
-| `pipeline.ts` | Autonomous loop: ingest → reason → anchor → persist |
-| `anchor.ts` | BSC Testnet onchain commit — writes `decisionHash` and `reasonHash` as immutable timestamps |
-| `verifier.ts` | Independent cryptographic audit agent — re-derives hash and verifies no tampering |
-| `datasource.ts` | Multi-source price corroboration (Binance Spot + Coinbase Spot, tolerance ≤ 0.5%) |
-| `canonical.ts` | Deterministic JSON serialization — ensures hash reproducibility (Trust Root) |
-| `provable.ts` | SHA-256 hash-chaining and proof math |
-| `mcp-client.ts` | Binance Agentic MCP client (OAuth + JSON-RPC) |
-| `store.ts` | Supabase (`backed` schema) + LocalStore persistence |
 
 ---
 
@@ -147,25 +135,44 @@ Add to your `claude_desktop_config.json` or `~/.cursor/mcp.json`:
 }
 ```
 
-### Available MCP Tools
+### Available MCP Tools (All Sections + Visual Charts)
 
-| Tool Name | What It Does |
-|---|---|
-| `backed_get_market_overview` | 24/7 global Binance Futures market intelligence (total volume, OI in USD, liquidations, sentiment). |
-| `backed_get_screener_all_contracts` | 24/7 smart money screener scanning all 718 Binance perpetual contracts. Filter by institutional regime, Top Trader ratio, and Taker flow. |
-| `backed_get_smart_money_intel` | Deep institutional derivatives intelligence for any specific symbol (e.g. BTCUSDT, SOLUSDT, ETHUSDT) with corroborated spot pricing. |
-| `backed_get_whale_exhaustion_signals` | 24/7 Whale Trap Shield scanning contracts for resistance exhaustion and impending sell dumps. |
-| `backed_calculate_intent_trade_setup` | Generates non-custodial risk blueprints (entry range, stop-loss, targets, $+EV\%$) with BSC Testnet anchor hash for external agent execution. |
+Every tool returns structured machine-readable JSON for autonomous bots **plus** visual Mermaid pie charts and Unicode ASCII progress bars for human-in-the-loop chat interfaces.
+
+| Tool Name | Section Covered | What It Does & What It Returns |
+|---|---|---|
+| `backed_get_quant_alpha_signals` | **Quant Alpha & Workflows** | Continuous surveillance of 718 contracts across 5 institutional models. Returns real-time VPIN toxicity, Margin Beta, 4-Quadrant Velocity, $+EV\%$, non-custodial limit entry/SL/TP blueprints, Claude Code commands, Python CCXT snippets, ASCII toxicity bar chart, and Mermaid model distribution pie chart. |
+| `backed_get_market_overview` | **Market Overview** | Macro Binance Futures intelligence: total volume, total OI in USD, liquidations, Fear & Greed index, top gainers/losers, with Mermaid Long vs Short breadth pie chart and ASCII positioning bar chart. |
+| `backed_get_screener_all_contracts` | **Token Screener** | 24/7 smart money screener across all 718 Binance perpetual contracts. Filter by institutional regime, volume, Top Trader ratio, taker ratio, and funding rate with ASCII volume rank bar charts. |
+| `backed_get_smart_money_intel` | **Symbol Deep Dive** | Deep symbol derivatives snapshot (e.g. BTCUSDT, SOLUSDT, ETHUSDT) with Binance vs Coinbase spot corroboration, VPIN score, 4-Quadrant velocity, and pre-formatted CCXT order snippet. |
+| `backed_get_smart_money_clusters` | **Smart Money** | 50-coin institutional positioning cluster intelligence (Scatter Plot). Identifies Smart Accumulation vs Distribution Trap clusters with Mermaid pie chart and ASCII accumulation bar chart. |
+| `backed_get_whale_exhaustion_signals` | **Whale Trap Shield** | 24/7 scanning for trapped retail longs and institutional exhaustion so agents can front-run distribution and safely exit or hedge open positions. |
+| `backed_calculate_intent_trade_setup` | **Execution Blueprints** | Non-custodial precision risk blueprints (optimal limit entry range, hard SL, TP1, TP2, R/R 1:2.4+, expected value $+EV\%$) with ready-to-execute Python CCXT and Claude Code snippets. |
+| `backed_smart_exit_whale_shield` | **Position Protection** | Calculates smart exit parameters and realized PnL estimates for position derisking. |
 
 ---
 
-## 4. Live Onchain Proofs (BNB Smart Chain)
+## 4. Non-Custodial Agent Trading Workflows
 
-Every trade setup and decision is anchored onchain before broadcast. Inspect recent live transactions on BSC Testnet:
+BACKED does **not** buy, sell, or hold any funds. External agents take our institutional alpha and execute orders directly on their own exchange accounts:
 
-- **SOL Intent Anchor:** [`0x22ecef7c7b9f3bb0372b8103c921092b78c2044378932611ab8c4d3aa58c358e`](https://testnet.bscscan.com/tx/0x22ecef7c7b9f3bb0372b8103c921092b78c2044378932611ab8c4d3aa58c358e)
-- **Whale Shield Exit Anchor:** [`0xec20ddbdf187517c8d4f94537506b643321cee9a86c06e7c1da1444556e65e13`](https://testnet.bscscan.com/tx/0xec20ddbdf187517c8d4f94537506b643321cee9a86c06e7c1da1444556e65e13)
-- **Chain ID:** `97` (BNB Smart Chain Testnet)
+### 1. Claude Code Terminal Workflow
+```bash
+claude "Scan BACKED MCP for institutional alpha signals with positive EV and execute the highest conviction long on Binance Futures with 2% risk"
+```
+
+### 2. Python CCXT Autonomous Bot
+```python
+import ccxt
+# External bot receives parameters from BACKED MCP tool: backed_calculate_intent_trade_setup
+exchange = ccxt.binanceusdm({'apiKey': 'YOUR_KEY', 'secret': 'YOUR_SECRET'})
+order = exchange.create_order('SOLUSDT', 'limit', 'buy', 1.5, 134.20, {'stopLossPrice': 131.80})
+```
+
+### 3. Visual Charts in Agent Chat
+When agents query BACKED tools, MCP automatically delivers:
+- **Mermaid Pie Charts**: Rendered inline as interactive graphical pie charts in Claude Desktop, Cursor, and markdown interfaces.
+- **Unicode ASCII Bar Charts**: Formatted horizontal progress bars for quick terminal inspection of VPIN toxicity, market breadth, and volume distribution.
 
 ---
 

@@ -231,7 +231,7 @@ export async function GET() {
           },
           provableAnchor: {
             decisionHash: `0x${rawHash}`,
-            network: "BSC Testnet",
+            protocol: "Binance Agent OS (Non-Custodial)",
             timestamp: new Date(now).toISOString(),
           },
         });

@@ -115,9 +115,11 @@ print(resp.choices[0].message.content)`;
     url: "${PROD_URL}/api/mcp"
     timeout: 60
     # 24/7 All-Market Intelligence Tools (Non-Custodial):
+    #  mcp__backed__backed_get_quant_alpha_signals
     #  mcp__backed__backed_get_market_overview
     #  mcp__backed__backed_get_screener_all_contracts
     #  mcp__backed__backed_get_smart_money_intel
+    #  mcp__backed__backed_get_smart_money_clusters
     #  mcp__backed__backed_get_whale_exhaustion_signals
     #  mcp__backed__backed_calculate_intent_trade_setup`;
 
@@ -135,13 +137,13 @@ async def backed(tool: str, args: dict):
     return r.json()["result"]["content"][0]["text"]
 
 async def main():
-    # Fetch 24/7 global market overview across 718 contracts
-    print(await backed("backed_get_market_overview", {}))
+    # Fetch live institutional quant alpha signals across 718 contracts
+    print(await backed("backed_get_quant_alpha_signals", {"limit": 5}))
 
 asyncio.run(main())`;
 
   const pythonMcp = `# Universal Python MCP Client — LangChain / CrewAI / AutoGen / custom
-# 24/7 Non-Custodial Market Intelligence Oracle across 718 Binance contracts.
+# 24/7 Non-Custodial Market Intelligence & Quant Scanner across 718 Binance contracts.
 # BACKED does NOT buy/sell/hold — your agent executes on your own exchange account.
 import asyncio, httpx
 
@@ -159,24 +161,28 @@ async def call_backed(tool_name: str, args: dict) -> str:
         return res.json()["result"]["content"][0]["text"]
 
 async def main():
-    # 1. 24/7 Global Market Overview (Volume, Open Interest, Sentiment)
-    overview = await call_backed("backed_get_market_overview", {})
-    print("Market Overview:", overview)
+    # 1. 24/7 Institutional Quant Alpha Signals (VPIN, Margin Beta, Models)
+    signals = await call_backed("backed_get_quant_alpha_signals", {"limit": 5})
+    print("Quant Alpha Signals & Charts:\n", signals)
 
-    # 2. 24/7 Screener across all 718 Binance Perpetual Contracts
+    # 2. 24/7 Global Market Overview (Volume, Open Interest, Breadth)
+    overview = await call_backed("backed_get_market_overview", {})
+    print("Market Overview:\n", overview)
+
+    # 3. 24/7 Screener across all 718 Binance Perpetual Contracts
     screener = await call_backed("backed_get_screener_all_contracts", {
         "regime": "Smart Accumulation",
         "limit": 5
     })
-    print("Smart Accumulation Coins:", screener)
+    print("Smart Accumulation Coins:\n", screener)
 
-    # 3. Deep Contract Intel (Order flow, Taker ratio, AI setup)
+    # 4. 50-Coin Institutional Positioning Clusters (Scatter Plot)
+    clusters = await call_backed("backed_get_smart_money_clusters", {"limit": 50})
+    print("Institutional Clusters:\n", clusters)
+
+    # 5. Deep Contract Intel (Order flow, Taker ratio, AI setup)
     intel = await call_backed("backed_get_smart_money_intel", {"symbol": "SOLUSDT"})
-    print("SOL Intel:", intel)
-
-    # 4. Whale Trap Shield (Front-run dumps & protect positions)
-    traps = await call_backed("backed_get_whale_exhaustion_signals", {"limit": 5})
-    print("Whale Warnings:", traps)
+    print("SOL Intel:\n", intel)
 
 asyncio.run(main())`;
 
