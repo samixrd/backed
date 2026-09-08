@@ -8,7 +8,7 @@
 ---
 
 ## BEAT 1 — HOOK · 0:00–0:12 · Hero + Market Overview
-**"Every trading AI claims ninety percent accuracy. Nobody can prove it — and every bot wants your keys. BACKED is a fully autonomous quant agent on Binance Agent OS: it proves every call it makes, and never touches your money."**
+**"Every trading AI claims ninety percent accuracy. Every bot wants your keys. BACKED is a fully autonomous quant agent on Binance Agent OS — institutional-grade alpha for other agents, and it never touches your money."**
 
 🖱 Start on hero: cursor trails the 4 stat chips — "Autonomous Intelligence Agent → Binance Agent OS → 8 MCP Tools → 100% Non-Custodial". Then scroll down into **Market Overview** macro cards.
 
@@ -43,7 +43,7 @@
 ---
 
 ## BEAT 6 — CLOSE · 1:15–1:30 · Quant tab → Hero
-**"No keys, no custody, no vibes. Live seven-eighteen-market perception, five institutional models, one-click agent workflows over MCP, and cryptographic hash on every blueprint before it ships. That's BACKED — quant alpha, provably dispatched, on Binance Agent OS."**
+**"No keys, no custody, no vibes. Live seven-eighteen-market perception, five institutional models, eight MCP tools, one-click agent workflows — so every external agent trades on its own account, on its own risk. That's BACKED — institutional alpha, delivered agent-to-agent, on Binance Agent OS."**
 
 🖱 Alt-Tab back to the Quant tab: point at the MCP tool-call JSON block (the `decisionHash`/setup JSON in the workflow panel) → 1 sec on the "100% Non-Custodial" hero chip → cut.
 
